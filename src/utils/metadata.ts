@@ -6,36 +6,29 @@ interface PageMetadata {
   title?: string;
   description?: string;
   keywords?: string[]; // Always treat keywords as an array for easier merging
-  urlPath?: string; // The path of the page, e.g., "/hubs"
+  urlPath?: string; // The path of the page, e.g., "/app"
   robots?: Metadata['robots'];
 }
 
-// --- Base Metadata for One Buffalo Games ---
-const BASE_URL = 'https://www.onebuffalogames.com';
-const SITE_NAME = 'One Buffalo Games';
+// --- Base Metadata for TallyPad ---
+const BASE_URL = 'https://tallypad.onebuffalolabs.com';
+const SITE_NAME = 'TallyPad';
 const TWITTER_CREATOR = '@onebuffalolabs';
-const DEFAULT_TITLE = 'One Buffalo Games | Game Hubs, Tools & Arcade Fun';
+const DEFAULT_TITLE = "TallyPad | The Last Scoresheet You'll Ever Need";
 const DEFAULT_DESCRIPTION =
-  'Find gaming tools, information hubs, and playable web games at One Buffalo Games. Your source for everything from stats to retro arcade fun.';
-const DEFAULT_OG_IMAGE = `${BASE_URL}/images/logos/top-text/one-buffalo-cartoon-top-text-white.png`;
+  'TallyPad is a simple, beautiful, and free scorekeeper for all your favorite card and board games. Focus on the fun, not the math.';
+const DEFAULT_OG_IMAGE = ''; // No image available yet
 const DEFAULT_KEYWORDS = [
-  'One Buffalo Games',
-  'gaming tools',
-  'gaming hubs',
-  'game information',
-  'game stats',
-  'stat trackers',
-  'loadout builders',
-  'interactive maps',
-  'web games',
-  'arcade games',
-  'retro games',
-  'Tower Defense',
-  'COD RCG',
-  'Halo tools',
-  'Battlefield info',
-  'video game news',
-  'Buffalo NY gaming',
+  'TallyPad',
+  'score keeper',
+  'scoresheet',
+  'board game scores',
+  'card game scores',
+  'Yahtzee scoresheet',
+  'Phase 10 score',
+  'game night tool',
+  'score tracker',
+  'digital scoresheet',
   'One Buffalo Labs',
 ];
 
@@ -78,14 +71,16 @@ export function generateMetadata({
       description: pageDescription,
       url: pageUrl,
       siteName: SITE_NAME,
-      images: [
-        {
-          url: DEFAULT_OG_IMAGE,
-          width: 1200,
-          height: 630,
-          alt: `${title || 'One Buffalo Games'} - Gaming Tools and Hubs`,
-        },
-      ],
+      images: DEFAULT_OG_IMAGE
+        ? [
+            {
+              url: DEFAULT_OG_IMAGE,
+              width: 1200,
+              height: 630,
+              alt: `${title || 'TallyPad'} - Digital Scoresheet`,
+            },
+          ]
+        : [],
       locale: 'en_US',
       type: 'website',
     },
@@ -94,11 +89,8 @@ export function generateMetadata({
       title: pageTitle,
       description: pageDescription,
       creator: TWITTER_CREATOR,
-      images: [DEFAULT_OG_IMAGE],
+      images: DEFAULT_OG_IMAGE ? [DEFAULT_OG_IMAGE] : [],
     },
     metadataBase: new URL(BASE_URL),
-    other: {
-      'google-adsense-account': 'ca-pub-9488377852201328',
-    },
   };
 }
