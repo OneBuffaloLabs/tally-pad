@@ -1,10 +1,20 @@
+'use client'; // This page will need state for games, so it should be a client component.
+
+import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import {
+  faPlus,
+  faDice,
+  faLayerGroup,
+  faGolfBall,
+  faClipboardList,
+} from '@fortawesome/free-solid-svg-icons';
+import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { Game } from '@/types'; // Import the Game type
+import Link from 'next/link';
 
 // --- Mock Data ---
-// In a real app, this would come from local storage and be validated against the Game type.
-const games: Game[] = [
+const initialGames: Game[] = [
   {
     id: '1',
     name: 'Rummy Night',
@@ -28,38 +38,49 @@ const games: Game[] = [
   },
 ];
 
-// Set to true to see the empty state, false to see the game list.
-const noGames = false;
+// Helper to get an icon based on the game name
+const getGameIcon = (gameName: string): IconDefinition => {
+  const lowerCaseName = gameName.toLowerCase();
+  if (lowerCaseName.includes('putt')) return faGolfBall;
+  if (lowerCaseName.includes('rummy') || lowerCaseName.includes('phase')) return faLayerGroup;
+  return faDice; // Default icon
+};
 
-// --- Main Page Component ---
-export default function Home() {
+// --- Main App Page Component ---
+export default function AppPage() {
+  // In a real app, you'd load this from local storage in a useEffect hook
+  const [games, setGames] = useState<Game[]>(initialGames);
+
   return (
-    <div className='bg-background min-h-screen text-foreground'>
-      {/* Header */}
-      <header className='p-4 border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-10'>
-        <h1 className='text-xl font-bold'>TallyPad</h1>
-      </header>
-
+    <div className='relative'>
       {/* Main Content Area */}
-      <main className='p-4 sm:p-6'>{noGames ? <EmptyState /> : <GameList />}</main>
+      <main className='p-4 sm:p-6 lg:p-8'>
+        {games.length === 0 ? <EmptyState /> : <GameList games={games} />}
+      </main>
 
       {/* Floating Action Button (FAB) */}
-      <a
+      <Link
         href='#' // Link to the "Create New Game" page/modal
         className='fixed bottom-6 right-6 bg-primary text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:scale-105 hover:shadow-xl transition-transform'
         aria-label='Create new game'>
-        <FontAwesomeIcon icon={faPlus} className='w-6 h-6' />
-      </a>
+        <FontAwesomeIcon
+          icon={faPlus}
+          className='w-6 h-6 group-hover:rotate-90 transition-transform'
+        />
+      </Link>
     </div>
   );
 }
 
 // --- Child Components ---
 
-const GameList = () => (
+const GameList = ({ games }: { games: Game[] }) => (
   <>
-    <h2 className='text-2xl font-semibold mb-4'>Your Games</h2>
-    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'>
+    <div className='mb-6'>
+      <h2 className='text-3xl font-bold text-foreground'>Your Games</h2>
+      <p className='text-foreground/60 mt-1'>Here&apos;s what you&apos;ve been playing.</p>
+    </div>
+    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
       {games.map((game) => (
         <GameCard key={game.id} {...game} />
       ))}
@@ -67,42 +88,58 @@ const GameList = () => (
   </>
 );
 
-// The GameCard now accepts props that match the Game type.
 const GameCard = ({ id, name, status, date, players }: Game) => {
-  const statusColor =
-    status === 'In Progress' ? 'bg-accent/20 text-accent-dark' : 'bg-gray-200 text-gray-700';
+  const statusStyles =
+    status === 'In Progress'
+      ? {
+          badge: 'bg-accent/20 text-yellow-800 dark:text-accent',
+          border: 'border-t-4 border-accent',
+        }
+      : {
+          badge: 'bg-secondary/10 text-secondary',
+          border: 'border-t-4 border-secondary/50',
+        };
 
   return (
-    <a
+    <Link
       href={`/game/${id}`}
-      className='block bg-white dark:bg-foreground/5 p-4 rounded-lg border border-border shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group'>
-      <div className='flex justify-between items-start'>
-        <h3 className='font-bold text-lg text-foreground'>{name}</h3>
-        <span className={`text-xs font-semibold px-2 py-1 rounded-full ${statusColor}`}>
-          {status}
-        </span>
-      </div>
-      <p className='text-sm text-foreground/60 mt-1'>{date}</p>
-      <div className='flex items-center space-x-2 mt-4'>
-        <p className='text-sm font-medium text-foreground/80'>Players:</p>
-        <div className='flex -space-x-2'>
-          {/* The 'player' parameter is now explicitly a string. */}
-          {players.map((player: string) => (
-            <div
-              key={player}
-              className='w-7 h-7 rounded-full bg-secondary text-white flex items-center justify-center text-xs font-bold border-2 border-white dark:border-foreground/5'>
-              {player}
-            </div>
-          ))}
+      className={`block bg-white dark:bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg hover:-translate-y-1.5 transition-all group ${statusStyles.border}`}>
+      <div className='p-5'>
+        <div className='flex justify-between items-start'>
+          <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${statusStyles.badge}`}>
+            {status}
+          </span>
+          <FontAwesomeIcon icon={getGameIcon(name)} className='text-foreground/20 h-6 w-6' />
+        </div>
+        <h3 className='font-bold text-xl text-foreground mt-3'>{name}</h3>
+        <p className='text-sm text-foreground/60 mt-1'>{date}</p>
+        <div className='flex items-center justify-between mt-6'>
+          <div className='flex -space-x-2'>
+            {players.map((player: string) => (
+              <div
+                key={player}
+                className='w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center text-xs font-bold border-2 border-white dark:border-foreground/10 group-hover:border-primary/20 transition-colors'>
+                {player}
+              </div>
+            ))}
+          </div>
+          <span className='text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity'>
+            Open &rarr;
+          </span>
         </div>
       </div>
-    </a>
+    </Link>
   );
 };
 
 const EmptyState = () => (
-  <div className='text-center py-20'>
-    <h2 className='text-2xl font-semibold mb-2'>No Games Yet!</h2>
-    <p className='text-foreground/60'>Tap the &apos;+&apos; button to start a new one.</p>
+  <div className='text-center py-20 flex flex-col items-center'>
+    <div className='bg-secondary/10 rounded-full p-6'>
+      <FontAwesomeIcon icon={faClipboardList} className='text-secondary h-16 w-16' />
+    </div>
+    <h2 className='text-3xl font-bold mt-6'>No Games Yet!</h2>
+    <p className='text-foreground/60 mt-2 max-w-sm'>
+      It looks like your scoresheet is empty. Tap the &apos;New Game&apos; button to get started.
+    </p>
   </div>
 );
