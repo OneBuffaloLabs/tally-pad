@@ -20,7 +20,7 @@ export default function PrivacyPolicyPage() {
       <Header />
 
       <main className='flex-grow px-4 py-12 sm:py-16'>
-        <div className='max-w-3xl mx-auto prose dark:prose-invert prose-h1:text-4xl prose-h1:font-extrabold prose-h1:text-secondary prose-h2:text-2xl prose-h2:font-bold prose-a:text-primary hover:prose-a:opacity-80'>
+        <div className='max-w-3xl mx-auto prose prose-p:text-foreground/80 prose-li:text-foreground/80 prose-headings:text-secondary prose-h1:text-4xl prose-h1:font-extrabold prose-h2:text-2xl prose-h2:font-bold prose-a:text-primary hover:prose-a:opacity-80'>
           <h1>Privacy Policy</h1>
           <p className='lead text-foreground/60'>
             <strong>Effective Date:</strong> August 2, 2025
@@ -75,7 +75,7 @@ export default function PrivacyPolicyPage() {
             TallyPad is an open-source project. We believe in full transparency. You can view the
             entire source code on our{' '}
             <a
-              href='https://github.com/onebuffalolabs/tally-pad' // Replace with your actual repo URL
+              href='https://github.com/onebuffalolabs/tally-pad'
               target='_blank'
               rel='noopener noreferrer'>
               GitHub repository
@@ -94,7 +94,7 @@ export default function PrivacyPolicyPage() {
           <h2>5. Contact Us</h2>
           <p>
             If you have any questions about this Privacy Policy, please feel free to contact us at{' '}
-            <a href='mailto:contact@onebuffalolabs.com'>contact@onebuffalolabs.com</a>.
+            <a href='mailto:info@onebuffalolabs.com'>info@onebuffalolabs.com</a>.
           </p>
         </div>
       </main>
