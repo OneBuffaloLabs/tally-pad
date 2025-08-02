@@ -9,8 +9,7 @@ import {
   faTrophy,
 } from '@fortawesome/free-solid-svg-icons';
 
-// Import the new client components
-import { Header, HeroSection, FinalCTA, Footer } from './landing-page-client';
+import { HeroSection, FinalCTA } from './landing-page-client';
 
 // --- Type Definitions for Component Props ---
 type FeatureCardProps = {
@@ -29,9 +28,8 @@ type StepCardProps = {
 // --- Main Landing Page Component ---
 export default function LandingPage() {
   return (
-    <div className='bg-background min-h-screen text-foreground font-sans'>
+    <>
       {/* Client Components for interactivity */}
-      <Header />
       <HeroSection />
 
       {/* Features Section */}
@@ -85,10 +83,7 @@ export default function LandingPage() {
 
       {/* Final CTA Section (Client Component) */}
       <FinalCTA />
-
-      {/* Footer */}
-      <Footer />
-    </div>
+    </>
   );
 }
 

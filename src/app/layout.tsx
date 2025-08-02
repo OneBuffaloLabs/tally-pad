@@ -1,13 +1,16 @@
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import AnalyticsInitializer from '@/components/AnalyticsInitializer';
-// --- Utils ---
+
+// --- Utils & Components ---
 import { generateMetadata } from '@/utils/metadata';
 import { generateViewport } from '@/utils/viewport';
+import AnalyticsInitializer from '@/components/AnalyticsInitializer';
+import { Header, Footer } from './landing-page-client';
+
 // --- Styles ---
 import './globals.css';
 
-// Font Awesome CSS fix
+// --- Font Awesome CSS Fix ---
 import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 config.autoAddCss = false;
@@ -25,8 +28,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en'>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
-      <AnalyticsInitializer />
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground font-sans flex flex-col min-h-screen`}>
+        <Header />
+        <main className='flex-grow'>{children}</main>
+        <Footer />
+        <AnalyticsInitializer />
+      </body>
     </html>
   );
 }
