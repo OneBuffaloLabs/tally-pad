@@ -10,7 +10,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 // Import the new client components
-import { Header, HeroSection, FinalCTA } from './landing-page-client';
+import { Header, HeroSection, FinalCTA, Footer } from './landing-page-client';
 
 // --- Type Definitions for Component Props ---
 type FeatureCardProps = {
@@ -87,9 +87,7 @@ export default function LandingPage() {
       <FinalCTA />
 
       {/* Footer */}
-      <footer className='text-center p-8 text-foreground/50'>
-        <p>&copy; {new Date().getFullYear()} TallyPad. An Open Source Project.</p>
-      </footer>
+      <Footer />
     </div>
   );
 }

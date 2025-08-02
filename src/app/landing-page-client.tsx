@@ -10,7 +10,12 @@ import { logEvent } from '@/lib/analytics';
 export const Header = () => {
   return (
     <header className='p-4 flex justify-between items-center sticky top-0 bg-background/80 backdrop-blur-sm z-50'>
-      <h1 className='text-xl font-bold'>TallyPad</h1>
+      <Link
+        href='/'
+        onClick={() => logEvent('Navigation', 'Click', 'Logo Header')}
+        className='text-xl font-bold text-primary hover:opacity-80 transition-opacity'>
+        TallyPad
+      </Link>
       <Link
         href='/app'
         onClick={() => logEvent('Navigation', 'Click', 'Launch App Header')}
@@ -75,5 +80,33 @@ export const FinalCTA = () => {
         </Link>
       </div>
     </section>
+  );
+};
+
+// --- Footer Component ---
+export const Footer = () => {
+  const startYear = 2025;
+  const currentYear = new Date().getFullYear();
+  const yearDisplay = startYear === currentYear ? startYear : `${startYear} - ${currentYear}`;
+
+  return (
+    <footer className='text-center p-8 text-foreground/50'>
+      <div className='flex justify-center gap-4 mb-4'>
+        <Link
+          href='/privacy'
+          onClick={() => logEvent('Navigation', 'Click', 'Privacy Policy Footer')}
+          className='text-sm hover:text-primary transition-colors'>
+          Privacy Policy
+        </Link>
+        <span className='text-foreground/30'>|</span>
+        <Link
+          href='/terms'
+          onClick={() => logEvent('Navigation', 'Click', 'Terms of Service Footer')}
+          className='text-sm hover:text-primary transition-colors'>
+          Terms of Service
+        </Link>
+      </div>
+      <p>&copy; {yearDisplay} TallyPad. An Open Source Project.</p>
+    </footer>
   );
 };
