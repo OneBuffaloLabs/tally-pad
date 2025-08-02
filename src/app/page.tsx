@@ -1,103 +1,121 @@
-import Image from "next/image";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import {
+  faDice,
+  faSave,
+  faMobileAlt,
+  faPlusCircle,
+  faClipboardList,
+  faTrophy,
+} from '@fortawesome/free-solid-svg-icons';
 
-export default function Home() {
+// Import the new client components
+import { Header, HeroSection, FinalCTA } from './landing-page-client';
+
+// --- Type Definitions for Component Props ---
+type FeatureCardProps = {
+  icon: IconDefinition;
+  title: string;
+  description: string;
+};
+
+type StepCardProps = {
+  icon: IconDefinition;
+  step: string;
+  title: string;
+  description: string;
+};
+
+// --- Main Landing Page Component ---
+export default function LandingPage() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className='bg-background min-h-screen text-foreground font-sans'>
+      {/* Client Components for interactivity */}
+      <Header />
+      <HeroSection />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* Features Section */}
+      <section className='bg-white dark:bg-foreground/5 py-20'>
+        <div className='max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 px-4'>
+          <FeatureCard
+            icon={faDice}
+            title='Supports Any Game'
+            description='From complex board games to simple card games, create a scoresheet that fits your needs.'
+          />
+          <FeatureCard
+            icon={faSave}
+            title='Saves Automatically'
+            description='Your games are saved locally in your browser, so you can pick up right where you left off.'
+          />
+          <FeatureCard
+            icon={faMobileAlt}
+            title='Mobile Friendly'
+            description='Designed to work beautifully on your phone, making it the perfect companion for game night.'
+          />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </section>
+
+      {/* How It Works Section */}
+      <section className='py-20'>
+        <div className='max-w-5xl mx-auto px-4 text-center'>
+          <h2 className='text-3xl font-bold mb-2'>Scoring in 3 Easy Steps</h2>
+          <p className='text-foreground/60 mb-12'>Get from zero to scoring in seconds.</p>
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
+            <StepCard
+              step='1'
+              icon={faPlusCircle}
+              title='Create Your Game'
+              description='Choose a game template and add your players.'
+            />
+            <StepCard
+              step='2'
+              icon={faClipboardList}
+              title='Tally the Scores'
+              description='Easily add scores round by round on a clean, simple interface.'
+            />
+            <StepCard
+              step='3'
+              icon={faTrophy}
+              title='Declare a Winner'
+              description='Totals are calculated automatically. See who comes out on top!'
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA Section (Client Component) */}
+      <FinalCTA />
+
+      {/* Footer */}
+      <footer className='text-center p-8 text-foreground/50'>
+        <p>&copy; {new Date().getFullYear()} TallyPad. An Open Source Project.</p>
       </footer>
     </div>
   );
 }
+
+// --- Child Components ---
+const FeatureCard = ({ icon, title, description }: FeatureCardProps) => (
+  <div className='flex flex-col items-center text-center'>
+    <div className='bg-secondary text-white rounded-full w-16 h-16 flex items-center justify-center'>
+      <FontAwesomeIcon icon={icon} size='2x' />
+    </div>
+    <h3 className='mt-4 text-xl font-bold'>{title}</h3>
+    <p className='mt-2 text-foreground/60'>{description}</p>
+  </div>
+);
+
+const StepCard = ({ icon, step, title, description }: StepCardProps) => (
+  <div className='flex flex-col items-center text-center'>
+    <div className='relative mb-4'>
+      <div className='bg-primary/10 text-primary rounded-full w-20 h-20 flex items-center justify-center'>
+        <FontAwesomeIcon icon={icon} size='2x' />
+      </div>
+      <span className='absolute -top-2 -left-2 bg-primary text-white text-sm font-bold w-8 h-8 rounded-full flex items-center justify-center border-4 border-background'>
+        {step}
+      </span>
+    </div>
+    <h3 className='mt-4 text-xl font-bold'>{title}</h3>
+    <p className='mt-2 text-foreground/60'>{description}</p>
+  </div>
+);
