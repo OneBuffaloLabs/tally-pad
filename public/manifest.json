@@ -1,0 +1,23 @@
+{
+  "name": "TallyPad",
+  "short_name": "TallyPad",
+  "description": "The last scoresheet you'll ever need. A simple, beautiful, and free scorekeeper for all your favorite card and board games.",
+  "start_url": "/app",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#00A86B",
+  "background_color": "#F7F9F9",
+  "display": "standalone"
+}
