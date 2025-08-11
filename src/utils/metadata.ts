@@ -5,8 +5,9 @@ import type { Metadata } from 'next';
 interface PageMetadata {
   title?: string;
   description?: string;
-  keywords?: string[]; // Always treat keywords as an array for easier merging
-  urlPath?: string; // The path of the page, e.g., "/app"
+  keywords?: string[];
+  urlPath?: string;
+  imageUrl?: string;
   robots?: Metadata['robots'];
 }
 
@@ -14,10 +15,11 @@ interface PageMetadata {
 const BASE_URL = 'https://tallypad.onebuffalolabs.com';
 const SITE_NAME = 'TallyPad';
 const TWITTER_CREATOR = '@onebuffalolabs';
+const GOOGLE_ADSENSE_ACCOUNT = 'ca-pub-9488377852201328';
 const DEFAULT_TITLE = "TallyPad | The Last Scoresheet You'll Ever Need";
 const DEFAULT_DESCRIPTION =
   'TallyPad is a simple, beautiful, and free scorekeeper for all your favorite card and board games. Focus on the fun, not the math.';
-const DEFAULT_OG_IMAGE = ''; // No image available yet
+const DEFAULT_OG_IMAGE = `${BASE_URL}/assets/logos/tally-pad.png`;
 const DEFAULT_KEYWORDS = [
   'TallyPad',
   'score keeper',
@@ -34,24 +36,30 @@ const DEFAULT_KEYWORDS = [
 
 /**
  * Generates metadata for a page, merging with site-wide defaults.
- * @param pageMeta - Page-specific metadata overrides.
- * @returns A Next.js Metadata object.
  */
 export function generateMetadata({
   title,
   description,
-  keywords = [], // Default to an empty array
+  keywords = [],
   urlPath = '',
+  imageUrl,
   robots,
 }: PageMetadata = {}): Metadata {
   const pageTitle = title ? `${title} | ${SITE_NAME}` : DEFAULT_TITLE;
   const pageDescription = description || DEFAULT_DESCRIPTION;
   const pageUrl = `${BASE_URL}${urlPath}`;
-
-  // Combine default and page-specific keywords, ensuring no duplicates
   const allKeywords = [...new Set([...DEFAULT_KEYWORDS, ...keywords])];
+  const ogImageUrl = imageUrl ? `${BASE_URL}${imageUrl}` : DEFAULT_OG_IMAGE;
+  const otherMetadata: Metadata['other'] = {};
+  if (GOOGLE_ADSENSE_ACCOUNT) {
+    otherMetadata['google-adsense-account'] = GOOGLE_ADSENSE_ACCOUNT;
+  }
 
   return {
+    metadataBase: new URL(BASE_URL),
+    alternates: {
+      canonical: pageUrl,
+    },
     title: {
       template: `%s | ${SITE_NAME}`,
       default: DEFAULT_TITLE,
@@ -61,6 +69,17 @@ export function generateMetadata({
     keywords: allKeywords,
     ...(robots && { robots: robots }),
     manifest: '/manifest.json',
+    icons: {
+      icon: [
+        // SVG icon for modern browsers
+        { url: '/icon.svg', type: 'image/svg+xml' },
+        { url: '/favicon-96x96.png', type: 'image/png', sizes: '96x96' },
+        // PNG icon as a fallback
+        { url: '/icon.png', type: 'image/png' },
+      ],
+      // Apple touch icon for iOS devices
+      apple: '/apple-icon.png',
+    },
     appleWebApp: {
       title: SITE_NAME,
       capable: true,
@@ -71,16 +90,15 @@ export function generateMetadata({
       description: pageDescription,
       url: pageUrl,
       siteName: SITE_NAME,
-      images: DEFAULT_OG_IMAGE
-        ? [
-            {
-              url: DEFAULT_OG_IMAGE,
-              width: 1200,
-              height: 630,
-              alt: `${title || 'TallyPad'} - Digital Scoresheet`,
-            },
-          ]
-        : [],
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: `${title || 'TallyPad'} - Digital Scoresheet`,
+          type: 'image/png',
+        },
+      ],
       locale: 'en_US',
       type: 'website',
     },
@@ -89,8 +107,8 @@ export function generateMetadata({
       title: pageTitle,
       description: pageDescription,
       creator: TWITTER_CREATOR,
-      images: DEFAULT_OG_IMAGE ? [DEFAULT_OG_IMAGE] : [],
+      images: [ogImageUrl],
     },
-    metadataBase: new URL(BASE_URL),
+    ...(Object.keys(otherMetadata).length > 0 && { other: otherMetadata }),
   };
 }

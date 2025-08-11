@@ -1,7 +1,7 @@
 import type { Viewport } from 'next';
 
 // Define the theme color constant
-const THEME_COLOR = '#010123';
+const THEME_COLOR = '#FFFFFF';
 
 /**
  * Generates the viewport configuration for the site.

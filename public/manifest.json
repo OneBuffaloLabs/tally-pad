@@ -1,5 +1,5 @@
 {
-  "name": "TallyPad",
+  "name": "Tally Pad",
   "short_name": "TallyPad",
   "description": "The last scoresheet you'll ever need. A simple, beautiful, and free scorekeeper for all your favorite card and board games.",
   "start_url": "/app",
@@ -17,7 +17,7 @@
       "purpose": "any maskable"
     }
   ],
-  "theme_color": "#00A86B",
-  "background_color": "#F7F9F9",
+  "theme_color": "#FFFFFF",
+  "background_color": "#FFFFFF",
   "display": "standalone"
 }
