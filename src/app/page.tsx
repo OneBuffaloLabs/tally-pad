@@ -8,8 +8,9 @@ import {
   faClipboardList,
   faTrophy,
 } from '@fortawesome/free-solid-svg-icons';
-
-import { HeroSection, FinalCTA } from './landing-page-client';
+// --- Client Components ---
+import { FinalCTA } from '@/components/landing/FinalCTA';
+import { HeroSection } from '@/components/landing/HeroSection';
 
 // --- Type Definitions for Component Props ---
 type FeatureCardProps = {
