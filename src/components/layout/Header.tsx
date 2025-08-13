@@ -1,10 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image'; // Import the Next.js Image component
+import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { logEvent } from '@/lib/analytics';
 
 export const Header = () => {
+  const pathname = usePathname();
+
   return (
     <header className='p-4 flex justify-between items-center sticky top-0 bg-background/80 backdrop-blur-sm z-50 border-b border-border'>
       <Link
@@ -16,16 +19,20 @@ export const Header = () => {
           alt='TallyPad Logo'
           width={40}
           height={40}
-          className='h-10 w-10' // Control responsive size
+          className='h-10 w-10'
         />
         <span>TallyPad</span>
       </Link>
-      <Link
-        href='/app'
-        onClick={() => logEvent('Navigation', 'Click', 'Launch App Header')}
-        className='bg-primary/10 text-primary font-semibold px-4 py-2 rounded-full text-sm hover:bg-primary/20 transition-colors'>
-        Launch App
-      </Link>
+
+      {/* Conditionally render the "Launch App" button */}
+      {pathname !== '/app/' && (
+        <Link
+          href='/app'
+          onClick={() => logEvent('Navigation', 'Click', 'Launch App Header')}
+          className='bg-primary/10 text-primary font-semibold px-4 py-2 rounded-full text-sm hover:bg-primary/20 transition-colors'>
+          Launch App
+        </Link>
+      )}
     </header>
   );
 };

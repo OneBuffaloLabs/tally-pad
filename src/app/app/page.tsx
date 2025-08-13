@@ -1,6 +1,6 @@
 'use client'; // This page will need state for games, so it should be a client component.
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faPlus,
