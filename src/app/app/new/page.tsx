@@ -53,11 +53,10 @@ export default function NewGamePage() {
         scores: [],
       };
       const response = await saveGame(newGame);
-      router.push(`/app/game/${response.id}`);
+      router.push(`/app/game?id=${response.id}`);
     } catch (error) {
       console.error('Failed to save game:', error);
-      // Optionally, show an error message to the user here
-      setIsSaving(false); // Re-enable the button on error
+      setIsSaving(false);
     }
   };
 

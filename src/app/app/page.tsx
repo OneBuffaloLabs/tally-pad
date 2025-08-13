@@ -101,7 +101,7 @@ const GameCard = ({ _id, name, status, date, players }: Game) => {
 
   return (
     <Link
-      href={`/app/game/${_id}`}
+      href={`/app/game?id=${_id}`}
       className={`block bg-white dark:bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg hover:-translate-y-1.5 transition-all group ${statusStyles.border}`}>
       <div className='p-5'>
         <div className='flex justify-between items-start'>
