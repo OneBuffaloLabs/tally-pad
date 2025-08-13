@@ -14,26 +14,15 @@ interface VersionDoc {
 let db: PouchDB.Database<Game | VersionDoc>;
 
 // --- Migration Logic ---
-
-/**
- * Applies migrations to the database.
- * @param fromVersion The version the database is currently at.
- */
 const migrateDB = async (fromVersion: number) => {
   if (fromVersion < 2) {
-    // Migration to version 2: Add a 'lastPlayed' timestamp.
     const { rows } = await db.allDocs({ include_docs: true });
-
     const docsToUpdate: (Game & PouchDB.Core.PutDocument<Game>)[] = [];
 
     rows.forEach(({ doc }) => {
-      // Ensure the doc exists and is not a local/special document
       if (doc && doc._id && !doc._id.startsWith('_local/')) {
-        const gameDoc = doc as Game; // Assert that this is a Game document
-
-        // Add the new field with a default value
+        const gameDoc = doc as Game;
         (gameDoc as any).lastPlayed = new Date(gameDoc.date).getTime();
-
         docsToUpdate.push(gameDoc as Game & PouchDB.Core.PutDocument<Game>);
       }
     });
@@ -42,14 +31,9 @@ const migrateDB = async (fromVersion: number) => {
       await db.bulkDocs(docsToUpdate);
     }
   }
-  // Add more "if (fromVersion < X)" blocks for future migrations.
 };
 
 // --- Database Initialization ---
-
-/**
- * Initializes the PouchDB database and runs migrations if needed.
- */
 export const initDB = async () => {
   if (!db) {
     db = new PouchDB<Game | VersionDoc>('tallypad-games');
@@ -74,7 +58,6 @@ export const initDB = async () => {
 };
 
 // --- CRUD Operations ---
-
 export const getAllGames = async (): Promise<Game[]> => {
   if (!db) await initDB();
   const result = await db.allDocs({ include_docs: true });

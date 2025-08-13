@@ -8,4 +8,5 @@ export type Game = {
   status: 'In Progress' | 'Completed';
   date: string;
   players: string[];
+  scores?: any[];
 };
