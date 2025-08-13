@@ -5,7 +5,8 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import { generateMetadata } from '@/utils/metadata';
 import { generateViewport } from '@/utils/viewport';
 import AnalyticsInitializer from '@/components/AnalyticsInitializer';
-import { Header, Footer } from './landing-page-client';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 
 // --- Styles ---
 import './globals.css';

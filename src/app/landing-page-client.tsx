@@ -1,4 +1,4 @@
-'use client';
+'use client'; // This directive marks the component as a Client Component
 
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -106,7 +106,19 @@ export const Footer = () => {
           Terms of Service
         </Link>
       </div>
-      <p>&copy; {yearDisplay} TallyPad. An Open Source Project.</p>
+      <p className='text-sm'>&copy; {yearDisplay} TallyPad. An Open Source Project.</p>
+      <p className='text-xs mt-2'>
+        A{' '}
+        <a
+          href='https://onebuffalolabs.com'
+          target='_blank'
+          rel='noopener noreferrer'
+          onClick={() => logEvent('Navigation', 'Click', 'One Buffalo Labs Footer')}
+          className='font-semibold hover:text-primary transition-colors'>
+          One Buffalo Labs
+        </a>{' '}
+        Project
+      </p>
     </footer>
   );
 };
