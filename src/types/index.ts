@@ -1,4 +1,12 @@
 // --- Type Definitions ---
+
+// Represents the version document stored in the database
+export interface VersionDoc {
+  _id: string;
+  _rev?: string;
+  version: number;
+}
+
 // Defines the shape of a single game session object for TypeScript.
 export type Game = {
   _id?: string;
@@ -15,3 +23,6 @@ export type Game = {
   };
   lastPlayed?: number;
 };
+
+// A union type representing any document that can be in our database
+export type PouchDoc = Game | VersionDoc;

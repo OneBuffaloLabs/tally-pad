@@ -132,10 +132,6 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
     <div className='p-4 sm:p-6 lg:p-8'>
       <div className='flex justify-between items-center mb-6'>
         <div className='flex items-center gap-4'>
-          <div className='flex text-accent'>
-            <FontAwesomeIcon icon={faDiceOne} size='2x' />
-            <FontAwesomeIcon icon={faDiceTwo} size='2x' />
-          </div>
           <h1 className='text-3xl font-bold text-foreground'>{game.name}</h1>
         </div>
         <Link

@@ -1,11 +1,11 @@
 'use client';
 
 import { createContext, useContext } from 'react';
-import { Game } from '@/types';
+import { PouchDoc } from '@/types';
 
 // Define the shape of the context data
 export interface DbContextType {
-  db: PouchDB.Database<Game | any> | null;
+  db: PouchDB.Database<PouchDoc> | null;
   isLoading: boolean;
 }
 
