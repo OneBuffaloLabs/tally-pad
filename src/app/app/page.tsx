@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useDb } from '@/contexts/DbContext'; // Use the context
+import { getAllGames } from '@/lib/database'; // Import the function
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faPlus,
@@ -16,20 +18,19 @@ import Link from 'next/link';
 
 // --- Main App Page Component ---
 export default function AppPage() {
+  const { db, isLoading } = useDb();
   const [games, setGames] = useState<Game[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadGames = async () => {
-      // Dynamically import the database functions
-      const { initDB, getAllGames } = await import('@/lib/database');
-      await initDB();
-      const savedGames = await getAllGames();
-      setGames(savedGames);
-      setIsLoading(false);
+      if (db) {
+        // Only run if db is initialized
+        const savedGames = await getAllGames(db);
+        setGames(savedGames);
+      }
     };
     loadGames();
-  }, []);
+  }, [db]); // Rerun when db is available
 
   // Updated loading state with a spinner
   if (isLoading) {

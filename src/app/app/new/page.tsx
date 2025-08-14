@@ -5,15 +5,17 @@ import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronRight, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { Game } from '@/types';
-import { saveGame } from '@/lib/database';
+import { useDb } from '@/contexts/DbContext';
+import { createGame } from '@/lib/database';
 import { generateId } from '@/lib/utils';
 
 export default function NewGamePage() {
+  const { db } = useDb();
   const [step, setStep] = useState(1);
   const [gameType, setGameType] = useState<string | null>(null);
   const [players, setPlayers] = useState<string[]>([]);
   const [playerName, setPlayerName] = useState('');
-  const [isSaving, setIsSaving] = useState(false); // New state for loading
+  const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
 
   const handleGameSelection = (type: string) => {
@@ -33,13 +35,17 @@ export default function NewGamePage() {
   };
 
   const handleStartGame = async () => {
-    if (players.length === 0 || !gameType || isSaving) {
+    if (!db || players.length === 0 || !gameType || isSaving) {
       return;
     }
-
     setIsSaving(true);
 
     try {
+      const initialScores: Game['scores'] = {};
+      players.forEach((player) => {
+        initialScores[player] = {};
+      });
+
       const newGame: Partial<Game> = {
         id: generateId(),
         name: gameType,
@@ -50,9 +56,10 @@ export default function NewGamePage() {
           day: 'numeric',
         }),
         players,
-        scores: [],
+        scores: initialScores,
       };
-      const response = await saveGame(newGame);
+
+      const response = await createGame(db, newGame);
       router.push(`/app/game?id=${response.id}`);
     } catch (error) {
       console.error('Failed to save game:', error);
@@ -68,13 +75,13 @@ export default function NewGamePage() {
           <div className='grid grid-cols-1 gap-4'>
             <button
               onClick={() => handleGameSelection('Yahtzee')}
-              className='text-left p-4 bg-white dark:bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>
+              className='cursor-pointer text-left p-4 bg-white dark:bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>
               <span className='font-bold text-lg'>Yahtzee</span>
               <FontAwesomeIcon icon={faChevronRight} />
             </button>
             <button
               onClick={() => handleGameSelection('Simple Score')}
-              className='text-left p-4 bg-white dark:bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>
+              className='cursor-pointer text-left p-4 bg-white dark:bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>
               <span className='font-bold text-lg'>Simple Score</span>
               <FontAwesomeIcon icon={faChevronRight} />
             </button>
@@ -95,7 +102,7 @@ export default function NewGamePage() {
             />
             <button
               onClick={handleAddPlayer}
-              className='bg-primary text-white font-semibold px-4 py-2 rounded-lg'>
+              className='bg-primary text-white font-semibold px-4 py-2 rounded-lg cursor-pointer'>
               Add
             </button>
           </div>
@@ -105,7 +112,9 @@ export default function NewGamePage() {
                 key={index}
                 className='p-2 bg-gray-100 dark:bg-foreground/5 rounded-lg flex justify-between items-center'>
                 <span>{player}</span>
-                <button onClick={() => handleRemovePlayer(index)} className='text-red-500'>
+                <button
+                  onClick={() => handleRemovePlayer(index)}
+                  className='text-red-500 cursor-pointer'>
                   <FontAwesomeIcon icon={faTrash} />
                 </button>
               </li>

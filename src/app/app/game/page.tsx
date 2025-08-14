@@ -3,31 +3,29 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Game } from '@/types';
-import { getGame, initDB } from '@/lib/database';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { useDb } from '@/contexts/DbContext';
+import { getGame } from '@/lib/database';
+import YahtzeeScorecard from '@/components/scorecards/YahtzeeScorecard';
 
 // A component that uses useSearchParams must be wrapped in a Suspense boundary.
 const GamePageContent = () => {
+  const { db } = useDb();
   const [game, setGame] = useState<Game | null>(null);
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
 
   useEffect(() => {
     const fetchGame = async () => {
-      if (id) {
-        await initDB(); // Ensure DB is initialized
-        try {
-          const gameData = await getGame(id);
-          setGame(gameData);
-        } catch (error) {
-          console.error('Failed to fetch game:', error);
-          // Optionally, set an error state here to show the user
-        }
+      if (db && id) {
+        // Check for db
+        const gameData = await getGame(db, id); // Pass db instance
+        setGame(gameData);
       }
     };
     fetchGame();
-  }, [id]);
+  }, [db, id]);
 
   if (!game) {
     return (
@@ -38,6 +36,11 @@ const GamePageContent = () => {
     );
   }
 
+  if (game.name === 'Yahtzee') {
+    return <YahtzeeScorecard game={game} />;
+  }
+
+  // Placeholder for other game types
   return (
     <div className='p-4'>
       <h1 className='text-3xl font-bold'>{game.name}</h1>
