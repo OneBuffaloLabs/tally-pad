@@ -1,4 +1,6 @@
 import { Game } from '@/types';
+// We only import the TYPE of PouchDB. This is erased at build time and is safe.
+import type PouchDB from 'pouchdb-browser';
 
 interface VersionDoc {
   _id: string;
@@ -19,7 +21,7 @@ const migrateDB = async (db: PouchDB.Database<any>, fromVersion: number) => {
         }
         return null;
       })
-      .filter((doc) => doc !== null);
+      .filter((doc): doc is Game => doc !== null);
 
     if (docsToUpdate.length > 0) {
       await db.bulkDocs(docsToUpdate as any);
@@ -27,6 +29,7 @@ const migrateDB = async (db: PouchDB.Database<any>, fromVersion: number) => {
   }
 };
 
+// This function now ACCEPTS a db instance.
 export const initDB = async (db: PouchDB.Database<any>) => {
   try {
     const versionDoc = (await db.get('_local/version')) as VersionDoc;
@@ -41,6 +44,7 @@ export const initDB = async (db: PouchDB.Database<any>) => {
   }
 };
 
+// All CRUD functions accept the db instance.
 export const getAllGames = async (db: PouchDB.Database<any>): Promise<Game[]> => {
   const result = await db.allDocs({ include_docs: true });
   return result.rows
