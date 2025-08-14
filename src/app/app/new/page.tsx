@@ -79,6 +79,13 @@ export default function NewGamePage() {
               <span className='font-bold text-lg'>Yahtzee</span>
               <FontAwesomeIcon icon={faChevronRight} />
             </button>
+            {/* --- NEW GAME OPTION --- */}
+            <button
+              onClick={() => handleGameSelection('Phase 10')}
+              className='cursor-pointer text-left p-4 bg-white dark:bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>
+              <span className='font-bold text-lg'>Phase 10</span>
+              <FontAwesomeIcon icon={faChevronRight} />
+            </button>
             <button
               onClick={() => handleGameSelection('Simple Score')}
               className='cursor-pointer text-left p-4 bg-white dark:bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>

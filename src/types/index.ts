@@ -18,7 +18,7 @@ export type Game = {
   players: string[];
   scores: {
     [player: string]: {
-      [category: string]: number | 'X' | null;
+      [category: string]: number | 'X' | null | boolean;
     };
   };
   lastPlayed?: number;
