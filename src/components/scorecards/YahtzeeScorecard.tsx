@@ -18,10 +18,20 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 
+// --- Type Definitions for this Component ---
 interface YahtzeeScorecardProps {
   game: Game;
 }
 
+interface PlayerTotals {
+  upperTotal: number;
+  bonus: number;
+  upperTotalWithBonus: number;
+  lowerTotal: number;
+  grandTotal: number;
+}
+
+// --- Constants ---
 const upperSectionCategories = ['Aces', 'Twos', 'Threes', 'Fours', 'Fives', 'Sixes'];
 const lowerSectionCategories = [
   '3 of a Kind',
@@ -34,7 +44,6 @@ const lowerSectionCategories = [
   'Yahtzee Bonus',
 ];
 
-// Map category names to their corresponding Font Awesome icons
 const categoryIcons: { [key: string]: IconDefinition } = {
   Aces: faDiceOne,
   Twos: faDiceTwo,
@@ -85,11 +94,9 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
       newScores[player][category] = score;
     }
 
-    // Optimistically update the local state for a responsive UI
     const updatedGame = { ...game, scores: newScores };
     setGame(updatedGame);
 
-    // Save the changes to the database
     await updateGame(db, game._id, { scores: newScores });
 
     setEditingCell(null);
@@ -97,13 +104,13 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
   };
 
   const totals = useMemo(() => {
-    const playerTotals: { [key: string]: any } = {};
+    const playerTotals: { [key: string]: PlayerTotals } = {}; // Use the specific type here
     game.players.forEach((player) => {
       const playerScores = game.scores?.[player] || {};
       let upperTotal = 0;
       upperSectionCategories.forEach((cat) => {
         if (typeof playerScores[cat] === 'number') {
-          upperTotal += playerScores[cat];
+          upperTotal += playerScores[cat] as number;
         }
       });
 
@@ -113,7 +120,7 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
       let lowerTotal = 0;
       lowerSectionCategories.forEach((cat) => {
         if (typeof playerScores[cat] === 'number') {
-          lowerTotal += playerScores[cat];
+          lowerTotal += playerScores[cat] as number;
         }
       });
 
@@ -131,9 +138,7 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
   return (
     <div className='p-4 sm:p-6 lg:p-8'>
       <div className='flex justify-between items-center mb-6'>
-        <div className='flex items-center gap-4'>
-          <h1 className='text-3xl font-bold text-foreground'>{game.name}</h1>
-        </div>
+        <h1 className='text-3xl font-bold text-foreground'>{game.name}</h1>
         <Link
           href='/app'
           className='bg-secondary/10 text-secondary font-semibold px-4 py-2 rounded-full text-sm hover:bg-secondary/20 transition-colors'>
@@ -144,6 +149,7 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
 
       <div className='overflow-x-auto shadow-lg rounded-xl'>
         <table className='min-w-full bg-white dark:bg-foreground/5 border-collapse'>
+          {/* Table Head */}
           <thead>
             <tr className='bg-gray-50 dark:bg-foreground/10'>
               <th className='p-3 text-left font-bold text-secondary text-sm tracking-wider w-1/4 border-b-2 border-border'></th>
@@ -159,6 +165,7 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
               ))}
             </tr>
           </thead>
+          {/* Table Body */}
           <tbody>
             {/* Upper Section */}
             {upperSectionCategories.map((category, idx) => (
@@ -202,6 +209,7 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
                 ))}
               </tr>
             ))}
+            {/* Totals */}
             <tr className='bg-secondary/10 font-bold'>
               <td className='p-3 text-secondary border-b border-border'>Upper Section Total</td>
               <td className='p-3 border-b border-border'></td>
@@ -222,7 +230,6 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
                 </td>
               ))}
             </tr>
-
             {/* Lower Section */}
             {lowerSectionCategories.map((category, idx) => (
               <tr
@@ -258,7 +265,6 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
                 ))}
               </tr>
             ))}
-
             <tr className='bg-secondary/10 font-bold'>
               <td className='p-3 text-secondary border-b border-border'>Lower Section Total</td>
               <td className='p-3 border-b border-border'></td>
@@ -281,6 +287,7 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
         </table>
       </div>
 
+      {/* Score Entry Modal */}
       {editingCell && (
         <div className='fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50'>
           <div className='bg-background p-6 rounded-lg shadow-2xl w-full max-w-sm border border-border'>

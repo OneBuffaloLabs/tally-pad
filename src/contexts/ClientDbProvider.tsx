@@ -3,8 +3,7 @@
 import { useState, useEffect, ReactNode } from 'react';
 import { DbContext } from './DbContext';
 import { initDB } from '@/lib/database';
-import { Game, PouchDoc } from '@/types'; // Assuming PouchDoc is your union type
-import type PouchDB from 'pouchdb-browser';
+import { PouchDoc } from '@/types'; // Assuming PouchDoc is your union type
 
 export const ClientDbProvider = ({ children }: { children: ReactNode }) => {
   const [db, setDb] = useState<PouchDB.Database<PouchDoc> | null>(null);
