@@ -300,7 +300,11 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
             <input
               type='number'
               value={scoreInput}
-              onChange={(e) => setScoreInput(e.target.value)}
+              onChange={(e) => {
+                if (e.target.value.length <= 2) {
+                  setScoreInput(e.target.value);
+                }
+              }}
               className='w-full p-3 bg-white dark:bg-foreground/5 border-2 border-border rounded-lg mb-4 text-center text-2xl font-bold focus:border-primary focus:ring-1 focus:ring-primary'
               placeholder='0'
               autoFocus
