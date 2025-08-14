@@ -1,6 +1,5 @@
-import { DbProvider } from '@/contexts/DbContext';
+import { ClientDbProvider } from '@/contexts/ClientDbProvider';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  return <DbProvider>{children}</DbProvider>;
+  return <ClientDbProvider>{children}</ClientDbProvider>;
 }
-
