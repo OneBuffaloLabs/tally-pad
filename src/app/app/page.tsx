@@ -89,41 +89,40 @@ const GameList = ({ games }: { games: Game[] }) => (
 );
 
 const GameCard = ({ _id, name, status, date, players }: Game) => {
-  const statusStyles =
-    status === 'In Progress'
-      ? {
-          badge: 'bg-accent/20 text-yellow-800 dark:text-accent',
-          border: 'border-t-4 border-accent',
-        }
-      : {
-          badge: 'bg-secondary/10 text-secondary',
-          border: 'border-t-4 border-secondary/50',
-        };
+  // Determine card styles based on status
+  const isInProgress = status === 'In Progress';
+  const cardBgColor = isInProgress ? 'bg-primary' : 'bg-secondary';
+  const textColor = 'text-white';
+  const subTextColor = 'text-white/80';
+  const iconColor = 'text-white/70';
+  const avatarStyles = isInProgress ? 'bg-white text-primary' : 'bg-white text-secondary';
 
   return (
     <Link
       href={`/app/game?id=${_id}`}
-      className={`block bg-white dark:bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg hover:-translate-y-1.5 transition-all group ${statusStyles.border}`}>
+      className={`block ${cardBgColor} rounded-lg shadow-sm hover:shadow-lg hover:-translate-y-1.5 transition-all group`}>
       <div className='p-5'>
         <div className='flex justify-between items-start'>
-          <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${statusStyles.badge}`}>
+          <span
+            className={`text-xs font-semibold px-2.5 py-1 rounded-full bg-white/20 ${textColor}`}>
             {status}
           </span>
-          <FontAwesomeIcon icon={getGameIcon(name)} className='text-foreground/20 h-6 w-6' />
+          <FontAwesomeIcon icon={getGameIcon(name)} className={`${iconColor} h-6 w-6`} />
         </div>
-        <h3 className='font-bold text-xl text-foreground mt-3'>{name}</h3>
-        <p className='text-sm text-foreground/60 mt-1'>{date}</p>
+        <h3 className={`font-bold text-xl ${textColor} mt-3`}>{name}</h3>
+        <p className={`text-sm ${subTextColor} mt-1`}>{date}</p>
         <div className='flex items-center justify-between mt-6'>
           <div className='flex -space-x-2'>
             {players.map((player: string, index: number) => (
               <div
                 key={index}
-                className='w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center text-xs font-bold border-2 border-white dark:border-foreground/10 group-hover:border-primary/20 transition-colors'>
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${avatarStyles}`}>
                 {player.charAt(0).toUpperCase()}
               </div>
             ))}
           </div>
-          <span className='text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity'>
+          <span
+            className={`text-sm font-medium ${textColor} opacity-0 group-hover:opacity-100 transition-opacity`}>
             Open &rarr;
           </span>
         </div>
