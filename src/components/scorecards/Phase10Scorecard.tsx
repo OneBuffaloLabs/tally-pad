@@ -105,6 +105,11 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
     return stats;
   }, [game.phase10Rounds, game.players]);
 
+  const canFinishGame = useMemo(
+    () => Object.values(playerStats).some((stat) => stat.currentPhase > 10),
+    [playerStats]
+  );
+
   const calculateWinners = () => {
     const completers = game.players.filter((p) => (playerStats[p]?.currentPhase ?? 0) > 10);
 
@@ -123,6 +128,13 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
       setWinners(currentWinners);
     }
   };
+
+  useEffect(() => {
+    // Ensure new games start with one round
+    if (!isCompleted && (!game.phase10Rounds || game.phase10Rounds.length === 0)) {
+      handleAddRound();
+    }
+  }, []);
 
   useEffect(() => {
     if (isCompleted) {
@@ -148,7 +160,7 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
   };
 
   const handleRemoveRound = () => {
-    if (isCompleted || roundCount <= 0) return; // Allow removing until 0
+    if (isCompleted || roundCount <= 1) return; // Prevent removing the last round
     const newRounds = (game.phase10Rounds || []).slice(0, -1);
     updateAndSetGame({ phase10Rounds: newRounds });
   };
@@ -166,7 +178,7 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
   };
 
   const handleFinishGame = async () => {
-    if (isCompleted || !db || !game._id) return;
+    if (isCompleted || !canFinishGame || !db || !game._id) return;
     calculateWinners();
     setShowWinnerModal(true);
     await updateAndSetGame({ status: 'Completed' });
@@ -187,14 +199,14 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
           </button>
           <button
             onClick={handleRemoveRound}
-            disabled={isCompleted || roundCount === 0}
+            disabled={isCompleted || roundCount <= 1}
             className='bg-red-600 text-white font-semibold px-4 py-2 rounded-full text-sm hover:bg-red-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed'>
             <FontAwesomeIcon icon={faTrash} className='mr-2' />
             Remove Round
           </button>
           <button
             onClick={handleFinishGame}
-            disabled={isCompleted}
+            disabled={isCompleted || !canFinishGame}
             className='bg-primary text-white font-semibold px-4 py-2 rounded-full text-sm hover:bg-green-700 transition-colors disabled:bg-gray-400'>
             <FontAwesomeIcon icon={faTrophy} className='mr-2' />
             Finish
