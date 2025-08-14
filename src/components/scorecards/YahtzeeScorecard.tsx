@@ -208,7 +208,7 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
       </div>
 
       {isCompleted && (
-        <div className='bg-accent/20 border-l-4 border-accent text-yellow-800 dark:text-accent p-4 rounded-lg mb-6'>
+        <div className='bg-primary/10 border-l-4 border-primary text-green-800 dark:text-primary p-4 rounded-lg mb-6'>
           <div className='flex items-center'>
             <FontAwesomeIcon icon={faTrophy} className='mr-3' size='2x' />
             <div>
