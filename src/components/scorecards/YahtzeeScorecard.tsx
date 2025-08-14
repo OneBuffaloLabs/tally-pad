@@ -40,7 +40,6 @@ const lowerSectionCategories = [
   'Large Straight',
   'Yahtzee',
   'Chance',
-  'Yahtzee Bonus',
 ];
 const categoryIcons: { [key: string]: IconDefinition } = {
   Aces: faDiceOne,
@@ -89,26 +88,38 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
     score: number | 'X' | null
   ) => {
     if (!db || !game._id) return;
-
     const newScores = { ...game.scores };
-    if (!newScores[player]) {
-      newScores[player] = {};
-    }
-
-    if (score === null) {
-      delete newScores[player][category];
-    } else {
-      newScores[player][category] = score;
-    }
-
+    if (!newScores[player]) newScores[player] = {};
+    if (score === null) delete newScores[player][category];
+    else newScores[player][category] = score;
     const updatedGame = { ...game, scores: newScores };
     setGame(updatedGame);
-
     await updateGame(db, game._id, { scores: newScores });
-
     setEditingCell(null);
-    setEditingFixedScoreCell(null); // Close the fixed score modal as well
+    setEditingFixedScoreCell(null);
     setScoreInput('');
+  };
+
+  const handleYahtzeeBonus = async (player: string, add: boolean) => {
+    if (!db || !game._id) return;
+    const currentBonuses = (game.scores?.[player]?.['Yahtzee Bonus'] as number) || 0;
+    let newBonusCount = add ? currentBonuses + 1 : currentBonuses - 1;
+
+    // Enforce the min/max bonus count
+    if (newBonusCount < 0) newBonusCount = 0;
+    if (newBonusCount > 10) newBonusCount = 10;
+
+    const newScores = { ...game.scores };
+    if (!newScores[player]) newScores[player] = {};
+    newScores[player]['Yahtzee Bonus'] = newBonusCount;
+    await updateAndSetGame({ scores: newScores });
+  };
+
+  const updateAndSetGame = async (updates: Partial<Game>) => {
+    if (!db || !game._id) return;
+    const updatedGame = { ...game, ...updates };
+    setGame(updatedGame);
+    await updateGame(db, game._id, updates);
   };
 
   const totals = useMemo(() => {
@@ -129,12 +140,14 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
           lowerTotal += playerScores[cat] as number;
         }
       });
+      const yahtzeeBonuses = (playerScores['Yahtzee Bonus'] as number) || 0;
+      const lowerTotalWithBonuses = lowerTotal + yahtzeeBonuses * 100;
       playerTotals[player] = {
         upperTotal,
         bonus,
         upperTotalWithBonus,
-        lowerTotal,
-        grandTotal: upperTotalWithBonus + lowerTotal,
+        lowerTotal: lowerTotalWithBonuses,
+        grandTotal: upperTotalWithBonus + lowerTotalWithBonuses,
       };
     });
     return playerTotals;
@@ -145,7 +158,6 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
     const scoreString =
       currentScore !== undefined && currentScore !== null ? String(currentScore) : '';
     setScoreInput(scoreString);
-
     if (Object.keys(fixedScoreCategories).includes(category)) {
       setEditingFixedScoreCell({ player, category });
     } else {
@@ -265,6 +277,33 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
                 ))}
               </tr>
             ))}
+            <tr className='bg-gray-50 dark:bg-foreground/10'>
+              <td className='p-3 font-semibold text-foreground/80 border-b border-border'>
+                Yahtzee Bonus
+              </td>
+              <td className='p-3 text-foreground/60 text-sm border-b border-border'>
+                Score 100 Per Bonus
+              </td>
+              {game.players.map((player) => (
+                <td key={player} className='p-3 text-center font-medium border-b border-border'>
+                  <div className='flex items-center justify-center gap-2'>
+                    <button
+                      onClick={() => handleYahtzeeBonus(player, false)}
+                      className='text-red-500 hover:text-red-700 font-bold text-lg cursor-pointer'>
+                      －
+                    </button>
+                    <span className='font-bold text-lg text-primary w-4 text-center'>
+                      {(game.scores?.[player]?.['Yahtzee Bonus'] as number) || 0}
+                    </span>
+                    <button
+                      onClick={() => handleYahtzeeBonus(player, true)}
+                      className='text-primary hover:text-green-500 font-bold text-lg cursor-pointer'>
+                      ＋
+                    </button>
+                  </div>
+                </td>
+              ))}
+            </tr>
 
             <tr className='bg-secondary/10 font-bold'>
               <td className='p-3 text-secondary border-b border-border'>Lower Section Total</td>
