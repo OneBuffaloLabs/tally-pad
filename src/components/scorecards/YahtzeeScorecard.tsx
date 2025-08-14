@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useDb } from '@/contexts/DbContext';
 import { updateGame } from '@/lib/database';
 import Link from 'next/link';
@@ -85,61 +85,7 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
   const [scoreInput, setScoreInput] = useState('');
   const [showWinnerModal, setShowWinnerModal] = useState(false);
   const [winners, setWinners] = useState<{ name: string; score: number }[]>([]);
-
-  const handleScoreChange = async (
-    player: string,
-    category: string,
-    score: number | 'X' | null
-  ) => {
-    if (!db || !game._id) return;
-    const newScores = { ...game.scores };
-    if (!newScores[player]) newScores[player] = {};
-    if (score === null) delete newScores[player][category];
-    else newScores[player][category] = score;
-    await updateAndSetGame({ scores: newScores });
-    setEditingCell(null);
-    setEditingFixedScoreCell(null);
-    setScoreInput('');
-  };
-
-  const handleYahtzeeBonus = async (player: string, add: boolean) => {
-    if (!db || !game._id) return;
-    const currentBonuses = (game.scores?.[player]?.['Yahtzee Bonus'] as number) || 0;
-    let newBonusCount = add ? currentBonuses + 1 : currentBonuses - 1;
-    if (newBonusCount < 0) newBonusCount = 0;
-    if (newBonusCount > 10) newBonusCount = 10;
-    const newScores = { ...game.scores };
-    if (!newScores[player]) newScores[player] = {};
-    newScores[player]['Yahtzee Bonus'] = newBonusCount;
-    await updateAndSetGame({ scores: newScores });
-  };
-
-  const handleFinishGame = async () => {
-    if (!db || !game._id) return;
-    let highestScore = -1;
-    let currentWinners: { name: string; score: number }[] = [];
-
-    game.players.forEach((player) => {
-      const playerScore = totals[player]?.grandTotal ?? 0;
-      if (playerScore > highestScore) {
-        highestScore = playerScore;
-        currentWinners = [{ name: player, score: playerScore }];
-      } else if (playerScore === highestScore) {
-        currentWinners.push({ name: player, score: playerScore });
-      }
-    });
-
-    setWinners(currentWinners);
-    setShowWinnerModal(true);
-    await updateAndSetGame({ status: 'Completed' });
-  };
-
-  const updateAndSetGame = async (updates: Partial<Game>) => {
-    if (!db || !game._id) return;
-    const updatedGame = { ...game, ...updates };
-    setGame(updatedGame);
-    await updateGame(db, game._id, updates);
-  };
+  const isCompleted = game.status === 'Completed';
 
   const totals = useMemo(() => {
     const playerTotals: { [key: string]: PlayerTotals } = {};
@@ -168,7 +114,67 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
     return playerTotals;
   }, [game.scores, game.players]);
 
+  // Calculate winners when the component loads if the game is already completed
+  useEffect(() => {
+    if (isCompleted) {
+      let highestScore = -1;
+      let currentWinners: { name: string; score: number }[] = [];
+      game.players.forEach((player) => {
+        const playerScore = totals[player]?.grandTotal ?? 0;
+        if (playerScore > highestScore) {
+          highestScore = playerScore;
+          currentWinners = [{ name: player, score: playerScore }];
+        } else if (playerScore === highestScore) {
+          currentWinners.push({ name: player, score: playerScore });
+        }
+      });
+      setWinners(currentWinners);
+    }
+  }, [isCompleted, game.players, totals]);
+
+  const handleScoreChange = async (
+    player: string,
+    category: string,
+    score: number | 'X' | null
+  ) => {
+    if (isCompleted || !db || !game._id) return;
+    const newScores = { ...game.scores };
+    if (!newScores[player]) newScores[player] = {};
+    if (score === null) delete newScores[player][category];
+    else newScores[player][category] = score;
+    await updateAndSetGame({ scores: newScores });
+    setEditingCell(null);
+    setEditingFixedScoreCell(null);
+    setScoreInput('');
+  };
+
+  const handleYahtzeeBonus = async (player: string, add: boolean) => {
+    if (isCompleted || !db || !game._id) return;
+    const currentBonuses = (game.scores?.[player]?.['Yahtzee Bonus'] as number) || 0;
+    let newBonusCount = add ? currentBonuses + 1 : currentBonuses - 1;
+    if (newBonusCount < 0) newBonusCount = 0;
+    if (newBonusCount > 10) newBonusCount = 10;
+    const newScores = { ...game.scores };
+    if (!newScores[player]) newScores[player] = {};
+    newScores[player]['Yahtzee Bonus'] = newBonusCount;
+    await updateAndSetGame({ scores: newScores });
+  };
+
+  const handleFinishGame = async () => {
+    if (isCompleted || !db || !game._id) return;
+    setShowWinnerModal(true);
+    await updateAndSetGame({ status: 'Completed' });
+  };
+
+  const updateAndSetGame = async (updates: Partial<Game>) => {
+    if (!db || !game._id) return;
+    const updatedGame = { ...game, ...updates };
+    setGame(updatedGame);
+    await updateGame(db, game._id, updates);
+  };
+
   const openModal = (player: string, category: string) => {
+    if (isCompleted) return; // Prevent opening modal for completed games
     const currentScore = game.scores?.[player]?.[category];
     const scoreString =
       currentScore !== undefined && currentScore !== null ? String(currentScore) : '';
@@ -187,9 +193,10 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
         <div className='flex items-center gap-2'>
           <button
             onClick={handleFinishGame}
-            className='bg-primary text-white font-semibold px-4 py-2 rounded-full text-sm hover:bg-green-700 transition-colors cursor-pointer'>
+            disabled={isCompleted}
+            className='bg-primary text-white font-semibold px-4 py-2 rounded-full text-sm hover:bg-green-700 transition-colors cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed'>
             <FontAwesomeIcon icon={faTrophy} className='mr-2' />
-            Finish Game
+            {isCompleted ? 'Game Finished' : 'Finish Game'}
           </button>
           <Link
             href='/app'
@@ -200,7 +207,29 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
         </div>
       </div>
 
-      <div className='overflow-x-auto shadow-lg rounded-xl'>
+      {isCompleted && (
+        <div className='bg-accent/20 border-l-4 border-accent text-yellow-800 dark:text-accent p-4 rounded-lg mb-6'>
+          <div className='flex items-center'>
+            <FontAwesomeIcon icon={faTrophy} className='mr-3' size='2x' />
+            <div>
+              <h3 className='font-bold text-lg'>
+                {winners.length > 1 ? "It's a Tie!" : 'Winner!'}
+              </h3>
+              {winners.map((winner) => (
+                <p key={winner.name}>
+                  <span className='font-semibold'>{winner.name}</span> with a score of{' '}
+                  {winner.score}
+                </p>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div
+        className={`overflow-x-auto shadow-lg rounded-xl ${
+          isCompleted ? 'opacity-75 pointer-events-none' : ''
+        }`}>
         <table className='min-w-full bg-white dark:bg-foreground/5 border-collapse'>
           <thead>
             <tr className='bg-gray-50 dark:bg-foreground/10'>
