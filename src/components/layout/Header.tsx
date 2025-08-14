@@ -25,7 +25,7 @@ export const Header = () => {
       </Link>
 
       {/* Conditionally render the "Launch App" button */}
-      {pathname !== '/app/' && (
+      {pathname === '/' && (
         <Link
           href='/app'
           onClick={() => logEvent('Navigation', 'Click', 'Launch App Header')}

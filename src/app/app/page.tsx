@@ -1,6 +1,8 @@
-'use client'; // This page will need state for games, so it should be a client component.
+'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useDb } from '@/contexts/DbContext'; // Use the context
+import { getAllGames } from '@/lib/database'; // Import the function
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faPlus,
@@ -8,48 +10,37 @@ import {
   faLayerGroup,
   faGolfBall,
   faClipboardList,
+  faSpinner, // Import the spinner icon
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
-import { Game } from '@/types'; // Import the Game type
+import { Game } from '@/types';
 import Link from 'next/link';
-
-// --- Mock Data ---
-const initialGames: Game[] = [
-  {
-    id: '1',
-    name: 'Rummy Night',
-    status: 'In Progress',
-    date: 'August 1, 2025',
-    players: ['A', 'B', 'C'],
-  },
-  {
-    id: '2',
-    name: 'Phase 10 Fun',
-    status: 'Completed',
-    date: 'July 28, 2025',
-    players: ['D', 'E', 'F', 'G'],
-  },
-  {
-    id: '3',
-    name: 'Putt Putt',
-    status: 'Completed',
-    date: 'July 25, 2025',
-    players: ['H', 'I'],
-  },
-];
-
-// Helper to get an icon based on the game name
-const getGameIcon = (gameName: string): IconDefinition => {
-  const lowerCaseName = gameName.toLowerCase();
-  if (lowerCaseName.includes('putt')) return faGolfBall;
-  if (lowerCaseName.includes('rummy') || lowerCaseName.includes('phase')) return faLayerGroup;
-  return faDice; // Default icon
-};
 
 // --- Main App Page Component ---
 export default function AppPage() {
-  // In a real app, you'd load this from local storage in a useEffect hook
-  const [games, setGames] = useState<Game[]>(initialGames);
+  const { db, isLoading } = useDb();
+  const [games, setGames] = useState<Game[]>([]);
+
+  useEffect(() => {
+    const loadGames = async () => {
+      if (db) {
+        // Only run if db is initialized
+        const savedGames = await getAllGames(db);
+        setGames(savedGames);
+      }
+    };
+    loadGames();
+  }, [db]); // Rerun when db is available
+
+  // Updated loading state with a spinner
+  if (isLoading) {
+    return (
+      <div className='flex flex-col items-center justify-center pt-20'>
+        <FontAwesomeIcon icon={faSpinner} spin size='3x' className='text-primary' />
+        <p className='mt-4 text-foreground/60'>Loading Games...</p>
+      </div>
+    );
+  }
 
   return (
     <div className='relative'>
@@ -60,19 +51,28 @@ export default function AppPage() {
 
       {/* Floating Action Button (FAB) */}
       <Link
-        href='#' // Link to the "Create New Game" page/modal
+        href='/app/new'
         className='fixed bottom-6 right-6 bg-primary text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:scale-105 hover:shadow-xl transition-transform'
         aria-label='Create new game'>
         <FontAwesomeIcon
           icon={faPlus}
-          className='w-6 h-6 group-hover:rotate-90 transition-transform'
+          className='group-hover:rotate-90 transition-transform'
+          size='2x'
         />
       </Link>
     </div>
   );
 }
 
-// --- Child Components ---
+// --- Helper function and Child Components ---
+
+// Helper to get an icon based on the game name
+const getGameIcon = (gameName: string): IconDefinition => {
+  const lowerCaseName = gameName.toLowerCase();
+  if (lowerCaseName.includes('putt')) return faGolfBall;
+  if (lowerCaseName.includes('rummy') || lowerCaseName.includes('phase')) return faLayerGroup;
+  return faDice; // Default icon
+};
 
 const GameList = ({ games }: { games: Game[] }) => (
   <>
@@ -82,13 +82,13 @@ const GameList = ({ games }: { games: Game[] }) => (
     </div>
     <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
       {games.map((game) => (
-        <GameCard key={game.id} {...game} />
+        <GameCard key={game._id} {...game} />
       ))}
     </div>
   </>
 );
 
-const GameCard = ({ id, name, status, date, players }: Game) => {
+const GameCard = ({ _id, name, status, date, players }: Game) => {
   const statusStyles =
     status === 'In Progress'
       ? {
@@ -102,7 +102,7 @@ const GameCard = ({ id, name, status, date, players }: Game) => {
 
   return (
     <Link
-      href={`/game/${id}`}
+      href={`/app/game?id=${_id}`}
       className={`block bg-white dark:bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg hover:-translate-y-1.5 transition-all group ${statusStyles.border}`}>
       <div className='p-5'>
         <div className='flex justify-between items-start'>
@@ -115,11 +115,11 @@ const GameCard = ({ id, name, status, date, players }: Game) => {
         <p className='text-sm text-foreground/60 mt-1'>{date}</p>
         <div className='flex items-center justify-between mt-6'>
           <div className='flex -space-x-2'>
-            {players.map((player: string) => (
+            {players.map((player: string, index: number) => (
               <div
-                key={player}
+                key={index}
                 className='w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center text-xs font-bold border-2 border-white dark:border-foreground/10 group-hover:border-primary/20 transition-colors'>
-                {player}
+                {player.charAt(0).toUpperCase()}
               </div>
             ))}
           </div>
@@ -135,7 +135,7 @@ const GameCard = ({ id, name, status, date, players }: Game) => {
 const EmptyState = () => (
   <div className='text-center py-20 flex flex-col items-center'>
     <div className='bg-secondary/10 rounded-full p-6'>
-      <FontAwesomeIcon icon={faClipboardList} className='text-secondary h-16 w-16' />
+      <FontAwesomeIcon icon={faClipboardList} className='text-secondary' size='4x' />
     </div>
     <h2 className='text-3xl font-bold mt-6'>No Games Yet!</h2>
     <p className='text-foreground/60 mt-2 max-w-sm'>

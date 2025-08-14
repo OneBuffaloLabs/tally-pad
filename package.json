@@ -1,13 +1,12 @@
 {
   "name": "tally-pad",
-  "version": "0.5.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build && npm run sitemap",
     "start": "next start",
     "lint": "next lint",
-    "serve": "npx serve@latest out",
     "sitemap": "next-sitemap && node sitemap-fix.js"
   },
   "dependencies": {
@@ -17,17 +16,21 @@
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "next": "15.4.5",
+    "pouchdb-browser": "^9.0.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "react-ga4": "^2.1.0"
+    "react-ga4": "^2.1.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^20",
+    "@types/pouchdb-browser": "^6.1.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/uuid": "^10.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.4.5",
     "next-sitemap": "^4.2.3",
