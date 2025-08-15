@@ -192,12 +192,12 @@ export default function AppPage() {
             <div className='grid grid-cols-2 gap-2'>
               <button
                 onClick={() => setShowClearConfirm(false)}
-                className='bg-gray-500 text-white font-semibold py-3 rounded-lg hover:bg-gray-600 transition-colors'>
+                className='bg-gray-500 text-white font-semibold py-3 rounded-lg hover:bg-gray-600 transition-colors cursor-pointer'>
                 Cancel
               </button>
               <button
                 onClick={handleClearAllData}
-                className='bg-red-600 text-white font-bold py-3 rounded-lg hover:bg-red-700 transition-colors'>
+                className='bg-red-600 text-white font-bold py-3 rounded-lg hover:bg-red-700 transition-colors cursor-pointer'>
                 Yes, Delete Everything
               </button>
             </div>
@@ -226,27 +226,46 @@ const GameList = ({ games, onDelete }: { games: Game[]; onDelete: (game: Game) =
 );
 
 const GameCard = ({ game, onDelete }: { game: Game; onDelete: (game: Game) => void }) => {
-  const { _id, name, status, date, players } = game;
+  const { _id, name, status, date, players, lastPlayed } = game;
   const isInProgress = status === 'In Progress';
   const cardBgColor = isInProgress ? 'bg-primary' : 'bg-secondary';
   const textColor = 'text-white';
   const subTextColor = 'text-white/80';
-  const iconColor = 'text-white/70';
   const avatarStyles = isInProgress ? 'bg-white text-primary' : 'bg-white text-secondary';
+
+  // Format the lastPlayed timestamp to include the time. Fallback to the original date.
+  const displayDate = lastPlayed
+    ? new Date(lastPlayed).toLocaleString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      })
+    : date;
 
   return (
     <div
       className={`relative ${cardBgColor} rounded-lg shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all group`}>
       <Link href={`/app/game?id=${_id}`} className='block p-5'>
+        {/* === TOP SECTION OF THE CARD === */}
         <div className='flex justify-between items-start'>
           <span
             className={`text-xs font-semibold px-2.5 py-1 rounded-full bg-white/20 ${textColor}`}>
             {status}
           </span>
-          <FontAwesomeIcon icon={getGameIcon(name)} className={`${iconColor} h-6 w-6`} />
         </div>
-        <h3 className={`font-bold text-xl ${textColor} mt-3 truncate`}>{name}</h3>
-        <p className={`text-sm ${subTextColor} mt-1`}>{date}</p>
+
+        {/* === MIDDLE SECTION OF THE CARD (MODIFIED) === */}
+        <div className='flex items-center gap-3 mt-3'>
+          <FontAwesomeIcon icon={getGameIcon(name)} className={`h-6 w-6 text-white/70`} />
+          <h3 className={`font-bold text-xl ${textColor} truncate`}>{name}</h3>
+        </div>
+        {/* Updated to display the new formatted date with time */}
+        <p className={`text-sm ${subTextColor} mt-1 ml-9`}>{displayDate}</p>
+
+        {/* === BOTTOM SECTION OF THE CARD === */}
         <div className='flex items-center justify-between mt-6'>
           <div className='flex -space-x-2'>
             {players.slice(0, 5).map((player: string, index: number) => (
@@ -271,7 +290,7 @@ const GameCard = ({ game, onDelete }: { game: Game; onDelete: (game: Game) => vo
           onDelete(game);
         }}
         aria-label={`Delete ${name} game`}
-        className='absolute cursor-pointer top-2 right-2 p-2 text-white/60 hover:text-white hover:bg-white/20 rounded-full transition-colors opacity-0 group-hover:opacity-100'>
+        className='cursor-pointer absolute top-2 right-2 p-2 text-white/60 hover:text-white hover:bg-white/20 rounded-full transition-colors opacity-0 group-hover:opacity-100'>
         <FontAwesomeIcon icon={faTrash} />
       </button>
     </div>
