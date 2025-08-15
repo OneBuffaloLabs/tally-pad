@@ -10,6 +10,7 @@ import { getGame } from '@/lib/database';
 // --- Scorecard Components ---
 import YahtzeeScorecard from '@/components/scorecards/YahtzeeScorecard';
 import Phase10Scorecard from '@/components/scorecards/Phase10Scorecard';
+import SimpleScorecard from '@/components/scorecards/SimpleScorecard'; // Import the new component
 
 // A component that uses useSearchParams must be wrapped in a Suspense boundary.
 const GamePageContent = () => {
@@ -38,7 +39,10 @@ const GamePageContent = () => {
     );
   }
 
-  if (game.name === 'Phase 10') {
+  // Add the new condition to render the SimpleScorecard
+  if (game.name === 'Simple Score') {
+    return <SimpleScorecard game={game} />;
+  } else if (game.name === 'Phase 10') {
     return <Phase10Scorecard game={game} />;
   } else if (game.name === 'Yahtzee') {
     return <YahtzeeScorecard game={game} />;
