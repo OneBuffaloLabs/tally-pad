@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useDb } from '@/contexts/DbContext';
 import { getGame, updateGame } from '@/lib/database';
 import Link from 'next/link';
@@ -112,7 +112,7 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
     [playerStats]
   );
 
-  const calculateWinners = () => {
+  const calculateWinners = useCallback(() => {
     const completers = game.players.filter((p) => (playerStats[p]?.currentPhase ?? 0) > 10);
 
     if (completers.length > 0) {
@@ -129,13 +129,13 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
       });
       setWinners(currentWinners);
     }
-  };
+  }, [game.players, playerStats]);
 
   useEffect(() => {
     if (isCompleted) {
       calculateWinners();
     }
-  }, [isCompleted, playerStats]);
+  }, [isCompleted, calculateWinners]);
 
   const updateAndSetGame = async (updates: Partial<Game>) => {
     if (!db || !game._id) return;
@@ -150,7 +150,7 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
     } catch (error) {
       console.error('Failed to update game:', error);
       // If a conflict occurs, refetch the latest game state to resolve it
-      if ((error as any).name === 'conflict' && game._id) {
+      if ((error as { name?: string }).name === 'conflict' && game._id) {
         const freshGame = await getGame(db, game._id);
         setGame(freshGame);
       }
