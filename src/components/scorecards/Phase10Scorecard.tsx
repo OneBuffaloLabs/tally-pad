@@ -42,7 +42,7 @@ const ScoreInputModal = ({
           type='number'
           value={score}
           onChange={(e) => e.target.value.length <= 3 && setScore(e.target.value)}
-          className='w-full p-3 bg-white dark:bg-foreground/5 border-2 border-border rounded-lg mb-4 text-center text-2xl font-bold focus:border-primary focus:ring-1 focus:ring-primary'
+          className='w-full p-3 bg-foreground/5 border-2 border-border rounded-lg mb-4 text-center text-2xl font-bold focus:border-primary focus:ring-1 focus:ring-primary'
           placeholder='0'
           autoFocus
         />
@@ -54,7 +54,9 @@ const ScoreInputModal = ({
             onChange={() => setPhaseCompleted(!phaseCompleted)}
             className='h-6 w-6 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer'
           />
-          <label htmlFor='phaseCompletedCheckbox' className='text-foreground font-medium'>
+          <label
+            htmlFor='phaseCompletedCheckbox'
+            className='text-foreground font-medium cursor-pointer'>
             Completed their phase this round?
           </label>
         </div>
@@ -193,27 +195,27 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
           <button
             onClick={handleAddRound}
             disabled={isCompleted || roundCount >= 25}
-            className='bg-secondary text-white font-semibold px-4 py-2 rounded-full text-sm hover:bg-blue-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed'>
+            className='bg-secondary cursor-pointer text-white font-semibold px-4 py-2 rounded-full text-sm hover:bg-blue-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed'>
             <FontAwesomeIcon icon={faPlus} className='mr-2' />
             Add Round
           </button>
           <button
             onClick={handleRemoveRound}
             disabled={isCompleted || roundCount <= 1}
-            className='bg-red-600 text-white font-semibold px-4 py-2 rounded-full text-sm hover:bg-red-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed'>
+            className='bg-red-600 cursor-pointer text-white font-semibold px-4 py-2 rounded-full text-sm hover:bg-red-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed'>
             <FontAwesomeIcon icon={faTrash} className='mr-2' />
             Remove Round
           </button>
           <button
             onClick={handleFinishGame}
             disabled={isCompleted || !canFinishGame}
-            className='bg-primary text-white font-semibold px-4 py-2 rounded-full text-sm hover:bg-green-700 transition-colors disabled:bg-gray-400'>
+            className='bg-primary cursor-pointer text-white font-semibold px-4 py-2 rounded-full text-sm hover:bg-green-700 transition-colors disabled:bg-gray-400'>
             <FontAwesomeIcon icon={faTrophy} className='mr-2' />
             Finish
           </button>
           <Link
             href='/app'
-            className='bg-gray-200 dark:bg-foreground/10 text-secondary dark:text-gray-300 font-semibold px-4 py-2 rounded-full text-sm hover:bg-gray-300 dark:hover:bg-foreground/20 transition-colors'>
+            className='bg-gray-200 text-foregroundfont-semibold px-4 py-2 rounded-full text-sm hover:bg-foreground/20 transition-colors'>
             <FontAwesomeIcon icon={faArrowLeft} className='mr-2' />
             Back
           </Link>
@@ -222,7 +224,7 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
 
       {/* Winner Banner */}
       {isCompleted && winners.length > 0 && (
-        <div className='bg-primary/10 border-l-4 border-primary text-green-800 dark:text-primary p-4 rounded-lg mb-6'>
+        <div className='bg-primary/10 border-l-4 border-primary text-primary p-4 rounded-lg mb-6'>
           <div className='flex items-center'>
             <FontAwesomeIcon icon={faTrophy} className='mr-3' size='2x' />
             <div>
@@ -246,18 +248,18 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
           isCompleted ? 'opacity-75 pointer-events-none' : ''
         }`}>
         <div className='overflow-x-auto'>
-          <table className='min-w-full bg-white dark:bg-foreground/5'>
-            <thead className='sticky bg-gray-100 dark:bg-secondary z-20'>
+          <table className='min-w-full bg-foreground/5'>
+            <thead className='sticky bg-secondary z-20'>
               <tr>
-                <th className='p-3 font-bold text-secondary dark:text-gray-200 text-sm tracking-wider text-left min-w-[100px]'>
+                <th className='p-3 font-bold text-gray-200 text-sm tracking-wider text-left min-w-[100px]'>
                   Round
                 </th>
                 {game.players.map((player) => (
                   <th
                     key={player}
-                    className='p-3 font-bold text-secondary dark:text-gray-200 text-sm tracking-wider text-center min-w-[120px]'>
+                    className='p-3 font-bold text-gray-200 text-sm tracking-wider text-center min-w-[120px]'>
                     <div className='text-lg font-extrabold truncate'>{player}</div>
-                    <div className='font-semibold text-primary'>
+                    <div className='font-semibold text-primary mt-2 text-2xl'>
                       Phase{' '}
                       {playerStats[player]?.currentPhase > 10
                         ? 10
@@ -269,9 +271,7 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
             </thead>
             <tbody className='divide-y divide-border'>
               {(game.phase10Rounds || []).map((round, roundIndex) => (
-                <tr
-                  key={roundIndex}
-                  className='dark:bg-foreground/5 even:bg-gray-50 dark:even:bg-foreground/10'>
+                <tr key={roundIndex} className='bg-foreground/5 even:bg-gray-50 '>
                   <td className='p-3 text-left font-bold text-foreground/70'>{roundIndex + 1}</td>
                   {game.players.map((player) => (
                     <td
@@ -292,13 +292,11 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
                 </tr>
               ))}
             </tbody>
-            <tfoot className='sticky bottom-0 bg-gray-200 dark:bg-gray-700 z-10'>
+            <tfoot className='sticky bottom-0 bg-gray-700 z-10'>
               <tr>
-                <td className='p-2 text-left font-bold text-secondary dark:text-gray-200'>Total</td>
+                <td className='p-2 text-left font-bold text-gray-200'>Total</td>
                 {game.players.map((player) => (
-                  <td
-                    key={player}
-                    className='p-2 text-center font-bold text-lg text-secondary dark:text-gray-200'>
+                  <td key={player} className='p-2 text-center font-bold text-lg text-gray-200'>
                     {playerStats[player]?.totalScore ?? 0}
                   </td>
                 ))}
