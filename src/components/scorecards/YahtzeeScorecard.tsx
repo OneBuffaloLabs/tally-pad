@@ -168,9 +168,9 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
 
   const updateAndSetGame = async (updates: Partial<Game>) => {
     if (!db || !game._id) return;
-    const updatedGame = { ...game, ...updates };
+    const updatedGame = { ...game, ...updates, lastPlayed: Date.now() };
     setGame(updatedGame);
-    await updateGame(db, game._id, updates);
+    await updateGame(db, game._id, { ...updates, lastPlayed: Date.now() });
   };
 
   const openModal = (player: string, category: string) => {

@@ -141,10 +141,12 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
     if (!db || !game._id) return;
 
     try {
-      const response = await updateGame(db, game._id, updates);
+      // Add lastPlayed timestamp to every update
+      const updatesWithTimestamp = { ...updates, lastPlayed: Date.now() };
+      const response = await updateGame(db, game._id, updatesWithTimestamp);
       setGame((currentGame) => ({
         ...currentGame,
-        ...updates,
+        ...updatesWithTimestamp,
         _rev: response.rev,
       }));
     } catch (error) {
