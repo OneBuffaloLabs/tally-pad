@@ -57,6 +57,7 @@ export default function NewGamePage() {
         }),
         players,
         scores: initialScores,
+        lastPlayed: Date.now(),
       };
 
       // --- ADD INITIAL ROUND FOR PHASE 10 ---

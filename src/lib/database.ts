@@ -1,5 +1,4 @@
 import { Game, PouchDoc, VersionDoc } from '@/types';
-// We only import the TYPE of PouchDB. This is erased at build time and is safe.
 import type PouchDB from 'pouchdb-browser';
 
 const DB_VERSION = 2;
@@ -72,4 +71,28 @@ export const updateGame = async (
   const doc = await db.get(gameId);
   const updatedDoc = { ...doc, ...updates };
   return await db.put(updatedDoc);
+};
+
+/**
+ * Deletes a specific game document from the database.
+ * @param db The PouchDB instance.
+ * @param gameId The _id of the game to delete.
+ * @param gameRev The _rev of the game to delete.
+ * @returns A promise that resolves with the PouchDB response.
+ */
+export const deleteGame = async (
+  db: PouchDB.Database<PouchDoc>,
+  gameId: string,
+  gameRev: string
+): Promise<PouchDB.Core.Response> => {
+  return db.remove(gameId, gameRev);
+};
+
+/**
+ * Destroys the entire database, deleting all data.
+ * @param db The PouchDB instance.
+ * @returns A promise that resolves when the database is destroyed.
+ */
+export const clearAllData = async (db: PouchDB.Database<PouchDoc>): Promise<void> => {
+  await db.destroy();
 };
