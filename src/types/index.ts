@@ -15,6 +15,14 @@ export interface Phase10Round {
   };
 }
 
+// A more specific type for player scores to differentiate between game types
+export interface PlayerScores {
+  // For "Simple Score" games, we expect a rounds array.
+  rounds?: number[];
+  // For other games like Yahtzee, we can have various other properties.
+  [category: string]: number | 'X' | null | boolean | number[] | undefined;
+}
+
 // Defines the shape of a single game session object for TypeScript.
 export type Game = {
   _id?: string;
@@ -25,11 +33,8 @@ export type Game = {
   date: string;
   players: string[];
   scores: {
-    [player: string]: {
-      [category: string]: number | 'X' | null | boolean;
-    };
+    [player: string]: PlayerScores; // Use the more specific PlayerScores type
   };
-  // Add a dedicated structure for Phase 10 rounds
   phase10Rounds?: Phase10Round[];
   lastPlayed?: number;
 };
