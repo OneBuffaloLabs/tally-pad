@@ -34,7 +34,7 @@ export default function LandingPage() {
       <HeroSection />
 
       {/* Features Section */}
-      <section className='bg-white dark:bg-foreground/5 py-20'>
+      <section className='bg-foreground/5 py-20'>
         <div className='max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 px-4'>
           <FeatureCard
             icon={faDice}

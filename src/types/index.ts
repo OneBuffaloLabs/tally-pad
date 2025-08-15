@@ -7,6 +7,14 @@ export interface VersionDoc {
   version: number;
 }
 
+// Represents the scores for a single round in Phase 10
+export interface Phase10Round {
+  [player: string]: {
+    score: number;
+    phaseCompleted: boolean;
+  };
+}
+
 // Defines the shape of a single game session object for TypeScript.
 export type Game = {
   _id?: string;
@@ -18,9 +26,11 @@ export type Game = {
   players: string[];
   scores: {
     [player: string]: {
-      [category: string]: number | 'X' | null;
+      [category: string]: number | 'X' | null | boolean;
     };
   };
+  // Add a dedicated structure for Phase 10 rounds
+  phase10Rounds?: Phase10Round[];
   lastPlayed?: number;
 };
 

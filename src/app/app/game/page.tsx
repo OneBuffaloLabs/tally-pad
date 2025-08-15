@@ -7,7 +7,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { useDb } from '@/contexts/DbContext';
 import { getGame } from '@/lib/database';
+// --- Scorecard Components ---
 import YahtzeeScorecard from '@/components/scorecards/YahtzeeScorecard';
+import Phase10Scorecard from '@/components/scorecards/Phase10Scorecard';
 
 // A component that uses useSearchParams must be wrapped in a Suspense boundary.
 const GamePageContent = () => {
@@ -36,7 +38,9 @@ const GamePageContent = () => {
     );
   }
 
-  if (game.name === 'Yahtzee') {
+  if (game.name === 'Phase 10') {
+    return <Phase10Scorecard game={game} />;
+  } else if (game.name === 'Yahtzee') {
     return <YahtzeeScorecard game={game} />;
   }
 
