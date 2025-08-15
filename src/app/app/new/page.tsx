@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronRight, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { Game } from '@/types';
+import { Game, Phase10Round } from '@/types';
 import { useDb } from '@/contexts/DbContext';
 import { createGame } from '@/lib/database';
 import { generateId } from '@/lib/utils';
@@ -59,6 +59,15 @@ export default function NewGamePage() {
         scores: initialScores,
       };
 
+      // --- ADD INITIAL ROUND FOR PHASE 10 ---
+      if (gameType === 'Phase 10') {
+        const initialRound: Phase10Round = {};
+        players.forEach((player) => {
+          initialRound[player] = { score: 0, phaseCompleted: false };
+        });
+        newGame.phase10Rounds = [initialRound];
+      }
+
       const response = await createGame(db, newGame);
       router.push(`/app/game?id=${response.id}`);
     } catch (error) {
@@ -79,7 +88,6 @@ export default function NewGamePage() {
               <span className='font-bold text-lg'>Yahtzee</span>
               <FontAwesomeIcon icon={faChevronRight} />
             </button>
-            {/* --- NEW GAME OPTION --- */}
             <button
               onClick={() => handleGameSelection('Phase 10')}
               className='cursor-pointer text-left p-4 bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>

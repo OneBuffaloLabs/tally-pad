@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useDb } from '@/contexts/DbContext';
-import { updateGame } from '@/lib/database';
+import { getGame, updateGame } from '@/lib/database';
 import Link from 'next/link';
 import { Game, Phase10Round } from '@/types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -132,13 +132,6 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
   };
 
   useEffect(() => {
-    // Ensure new games start with one round
-    if (!isCompleted && (!game.phase10Rounds || game.phase10Rounds.length === 0)) {
-      handleAddRound();
-    }
-  }, []);
-
-  useEffect(() => {
     if (isCompleted) {
       calculateWinners();
     }
@@ -146,9 +139,22 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
 
   const updateAndSetGame = async (updates: Partial<Game>) => {
     if (!db || !game._id) return;
-    const updatedGame = { ...game, ...updates };
-    setGame(updatedGame);
-    await updateGame(db, game._id, updates);
+
+    try {
+      const response = await updateGame(db, game._id, updates);
+      setGame((currentGame) => ({
+        ...currentGame,
+        ...updates,
+        _rev: response.rev,
+      }));
+    } catch (error) {
+      console.error('Failed to update game:', error);
+      // If a conflict occurs, refetch the latest game state to resolve it
+      if ((error as any).name === 'conflict' && game._id) {
+        const freshGame = await getGame(db, game._id);
+        setGame(freshGame);
+      }
+    }
   };
 
   const handleAddRound = () => {
@@ -173,7 +179,7 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
     score: number,
     phaseCompleted: boolean
   ) => {
-    const newRounds = [...(game.phase10Rounds || [])];
+    const newRounds = JSON.parse(JSON.stringify(game.phase10Rounds || []));
     newRounds[roundIndex][player] = { score, phaseCompleted };
     updateAndSetGame({ phase10Rounds: newRounds });
     setEditingCell(null);
@@ -274,7 +280,7 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
             </thead>
             <tbody className='divide-y divide-border'>
               {(game.phase10Rounds || []).map((round, roundIndex) => (
-                <tr key={roundIndex} className='bg-foreground/5 even:bg-gray-50 '>
+                <tr key={roundIndex} className='bg-foreground/5 even:bg-gray-50'>
                   <td className='p-3 text-left font-bold text-foreground/70'>{roundIndex + 1}</td>
                   {game.players.map((player) => (
                     <td
