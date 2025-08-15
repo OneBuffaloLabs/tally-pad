@@ -259,11 +259,14 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
                     key={player}
                     className='p-3 font-bold text-gray-200 text-sm tracking-wider text-center min-w-[120px]'>
                     <div className='text-lg font-extrabold truncate'>{player}</div>
-                    <div className='font-semibold text-primary mt-2 text-2xl'>
-                      Phase{' '}
-                      {playerStats[player]?.currentPhase > 10
-                        ? 10
-                        : playerStats[player]?.currentPhase}
+                    <div className='font-semibold text-primary mt-2 text-xl'>
+                      {playerStats[player]?.currentPhase > 10 ? (
+                        <span className='text-accent flex items-center justify-center gap-2'>
+                          Phase 10 <FontAwesomeIcon icon={faTrophy} size='xs' />
+                        </span>
+                      ) : (
+                        `Phase ${playerStats[player]?.currentPhase}`
+                      )}
                     </div>
                   </th>
                 ))}

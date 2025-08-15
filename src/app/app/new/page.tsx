@@ -75,20 +75,20 @@ export default function NewGamePage() {
           <div className='grid grid-cols-1 gap-4'>
             <button
               onClick={() => handleGameSelection('Yahtzee')}
-              className='cursor-pointer text-left p-4 bg-white dark:bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>
+              className='cursor-pointer text-left p-4 bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>
               <span className='font-bold text-lg'>Yahtzee</span>
               <FontAwesomeIcon icon={faChevronRight} />
             </button>
             {/* --- NEW GAME OPTION --- */}
             <button
               onClick={() => handleGameSelection('Phase 10')}
-              className='cursor-pointer text-left p-4 bg-white dark:bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>
+              className='cursor-pointer text-left p-4 bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>
               <span className='font-bold text-lg'>Phase 10</span>
               <FontAwesomeIcon icon={faChevronRight} />
             </button>
             <button
               onClick={() => handleGameSelection('Simple Score')}
-              className='cursor-pointer text-left p-4 bg-white dark:bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>
+              className='cursor-pointer text-left p-4 bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>
               <span className='font-bold text-lg'>Simple Score</span>
               <FontAwesomeIcon icon={faChevronRight} />
             </button>
@@ -117,7 +117,7 @@ export default function NewGamePage() {
             {players.map((player, index) => (
               <li
                 key={index}
-                className='p-2 bg-gray-100 dark:bg-foreground/5 rounded-lg flex justify-between items-center'>
+                className='p-2 bg-foreground/5 rounded-lg flex justify-between items-center'>
                 <span>{player}</span>
                 <button
                   onClick={() => handleRemovePlayer(index)}

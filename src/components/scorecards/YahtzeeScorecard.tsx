@@ -208,7 +208,7 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
       </div>
 
       {isCompleted && (
-        <div className='bg-primary/10 border-l-4 border-primary text-green-800 dark:text-primary p-4 rounded-lg mb-6'>
+        <div className='bg-primary/10 border-l-4 border-primary text-primary p-4 rounded-lg mb-6'>
           <div className='flex items-center'>
             <FontAwesomeIcon icon={faTrophy} className='mr-3' size='2x' />
             <div>
@@ -230,9 +230,9 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
         className={`overflow-x-auto shadow-lg rounded-xl ${
           isCompleted ? 'opacity-75 pointer-events-none' : ''
         }`}>
-        <table className='min-w-full bg-white dark:bg-foreground/5 border-collapse'>
+        <table className='min-w-full bg-foreground/5 border-collapse'>
           <thead>
-            <tr className='bg-gray-50 dark:bg-foreground/10'>
+            <tr className='bg-foreground/10'>
               <th className='p-3 text-left font-bold text-secondary text-sm tracking-wider w-1/4 border-b-2 border-border'></th>
               <th className='p-3 text-left font-bold text-secondary text-sm tracking-wider w-1/4 border-b-2 border-border'>
                 How to Score
@@ -249,13 +249,7 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
           <tbody>
             {/* Upper Section */}
             {upperSectionCategories.map((category, idx) => (
-              <tr
-                key={category}
-                className={
-                  idx % 2 === 0
-                    ? 'bg-white dark:bg-foreground/5'
-                    : 'bg-gray-50 dark:bg-foreground/10'
-                }>
+              <tr key={category} className={idx % 2 === 0 ? 'bg-foreground/5' : 'bg-foreground/10'}>
                 <td className='p-3 font-semibold text-foreground/80 border-b border-border'>
                   <div className='flex items-center gap-3'>
                     <FontAwesomeIcon
@@ -304,13 +298,7 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
 
             {/* Lower Section */}
             {lowerSectionCategories.map((category, idx) => (
-              <tr
-                key={category}
-                className={
-                  idx % 2 === 0
-                    ? 'bg-white dark:bg-foreground/5'
-                    : 'bg-gray-50 dark:bg-foreground/10'
-                }>
+              <tr key={category} className={idx % 2 === 0 ? 'bg-foreground/5' : 'bg-foreground/10'}>
                 <td className='p-3 font-semibold text-foreground/80 border-b border-border'>
                   {category}
                 </td>
@@ -329,7 +317,7 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
                 ))}
               </tr>
             ))}
-            <tr className='bg-gray-50 dark:bg-foreground/10'>
+            <tr className='bg-foreground/10'>
               <td className='p-3 font-semibold text-foreground/80 border-b border-border'>
                 Yahtzee Bonus
               </td>
@@ -395,7 +383,7 @@ export default function YahtzeeScorecard({ game: initialGame }: YahtzeeScorecard
                   setScoreInput(e.target.value);
                 }
               }}
-              className='w-full p-3 bg-white dark:bg-foreground/5 border-2 border-border rounded-lg mb-4 text-center text-2xl font-bold focus:border-primary focus:ring-1 focus:ring-primary'
+              className='w-full p-3 bg-foreground/5 border-2 border-border rounded-lg mb-4 text-center text-2xl font-bold focus:border-primary focus:ring-1 focus:ring-primary'
               placeholder='0'
               autoFocus
             />
