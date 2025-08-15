@@ -1,12 +1,19 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useDb } from '@/contexts/DbContext';
 import { updateGame } from '@/lib/database';
 import Link from 'next/link';
 import { Game } from '@/types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faTrophy, faPlus, faUndo } from '@fortawesome/free-solid-svg-icons';
+import {
+  faArrowLeft,
+  faPlus,
+  faUndo,
+  faSort,
+  faPen,
+  faTimes,
+} from '@fortawesome/free-solid-svg-icons';
 
 interface SimpleScorecardProps {
   game: Game;
@@ -17,16 +24,34 @@ export default function SimpleScorecard({ game: initialGame }: SimpleScorecardPr
   const [game, setGame] = useState(initialGame);
   const [scoreInput, setScoreInput] = useState('');
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
+  const [sortedPlayers, setSortedPlayers] = useState<string[]>(initialGame.players);
+  const [sortAsc, setSortAsc] = useState(false);
+  const [editingScore, setEditingScore] = useState<{
+    player: string;
+    index: number;
+  } | null>(null);
+  const [editingValue, setEditingValue] = useState('');
 
   const totals = useMemo(() => {
     const playerTotals: { [key: string]: number } = {};
     game.players.forEach((player) => {
-      // This part is now safer. It defaults to an empty array if rounds is undefined.
       const playerScores = game.scores?.[player]?.rounds || [];
       playerTotals[player] = playerScores.reduce((acc, score) => acc + score, 0);
     });
     return playerTotals;
   }, [game.scores, game.players]);
+
+  const winningScore = useMemo(() => Math.max(0, ...Object.values(totals)), [totals]);
+
+  useEffect(() => {
+    setSortedPlayers(
+      [...game.players].sort((a, b) => {
+        const scoreA = totals[a] ?? 0;
+        const scoreB = totals[b] ?? 0;
+        return sortAsc ? scoreA - scoreB : scoreB - scoreA;
+      })
+    );
+  }, [totals, game.players, sortAsc]);
 
   const updateAndSetGame = async (updates: Partial<Game>) => {
     if (!db || !game._id) return;
@@ -41,40 +66,50 @@ export default function SimpleScorecard({ game: initialGame }: SimpleScorecardPr
 
     const currentPlayer = game.players[currentPlayerIndex];
     const newScores = JSON.parse(JSON.stringify(game.scores || {}));
-
-    // Safely initialize the player's score object and rounds array if they don't exist
-    if (!newScores[currentPlayer]) {
-      newScores[currentPlayer] = { rounds: [] };
-    }
-    if (!newScores[currentPlayer].rounds) {
-      newScores[currentPlayer].rounds = [];
-    }
-
-    // Now we can safely push without type assertions
+    if (!newScores[currentPlayer]) newScores[currentPlayer] = { rounds: [] };
+    if (!newScores[currentPlayer].rounds) newScores[currentPlayer].rounds = [];
     newScores[currentPlayer].rounds.push(score);
 
     await updateAndSetGame({ scores: newScores });
-
     setCurrentPlayerIndex((prevIndex) => (prevIndex + 1) % game.players.length);
     setScoreInput('');
   };
 
+  const handleEditScore = async () => {
+    if (!editingScore) return;
+    const newScore = parseInt(editingValue, 10);
+    if (isNaN(newScore) || !db || !game._id) return;
+
+    const { player, index } = editingScore;
+    const newScores = JSON.parse(JSON.stringify(game.scores || {}));
+    if (newScores[player]?.rounds?.[index] !== undefined) {
+      newScores[player].rounds[index] = newScore;
+      await updateAndSetGame({ scores: newScores });
+    }
+    setEditingScore(null);
+    setEditingValue('');
+  };
+
+  const handleOpenEditModal = (player: string, index: number) => {
+    const score = game.scores?.[player]?.rounds?.[index];
+    if (typeof score === 'number') {
+      setEditingScore({ player, index });
+      setEditingValue(String(score));
+    }
+  };
+
   const handleClearLastRound = async () => {
     if (!db || !game._id) return;
-
     const newScores = JSON.parse(JSON.stringify(game.scores || {}));
     let roundCleared = false;
     game.players.forEach((player) => {
-      // Check that the rounds array exists and is not empty before popping
       if (newScores[player]?.rounds?.length > 0) {
         newScores[player].rounds.pop();
         roundCleared = true;
       }
     });
 
-    if (roundCleared) {
-      await updateAndSetGame({ scores: newScores });
-    }
+    if (roundCleared) await updateAndSetGame({ scores: newScores });
   };
 
   const currentPlayer = game.players[currentPlayerIndex];
@@ -91,7 +126,6 @@ export default function SimpleScorecard({ game: initialGame }: SimpleScorecardPr
         </Link>
       </div>
 
-      {/* Score Input Section */}
       <div className='bg-background border border-border rounded-lg p-6 mb-8 shadow-sm'>
         <h2 className='text-2xl font-bold text-center text-foreground mb-4'>
           Current Turn: <span className='text-primary'>{currentPlayer}</span>
@@ -115,24 +149,28 @@ export default function SimpleScorecard({ game: initialGame }: SimpleScorecardPr
         </div>
       </div>
 
-      {/* Scores Table */}
       <div className='shadow-lg rounded-xl overflow-hidden'>
         <div className='overflow-x-auto'>
           <table className='min-w-full bg-foreground/5'>
             <thead className='bg-secondary'>
               <tr>
-                {game.players.map((player) => (
-                  <th
-                    key={player}
-                    className='p-4 font-bold text-gray-200 text-lg tracking-wider text-center'>
-                    {player}
-                  </th>
-                ))}
+                {sortedPlayers.map((player) => {
+                  const isWinning = totals[player] === winningScore && winningScore > 0;
+                  return (
+                    <th
+                      key={player}
+                      className={`p-4 font-bold text-gray-200 text-lg tracking-wider text-center transition-colors ${
+                        isWinning ? 'bg-accent text-secondary' : ''
+                      }`}>
+                      {player}
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody>
               <tr className='bg-gray-700 text-white font-extrabold text-2xl'>
-                {game.players.map((player) => (
+                {sortedPlayers.map((player) => (
                   <td key={player} className='p-4 text-center'>
                     {totals[player] ?? 0}
                   </td>
@@ -141,15 +179,29 @@ export default function SimpleScorecard({ game: initialGame }: SimpleScorecardPr
             </tbody>
           </table>
           <div className='p-4 bg-background border-t border-border'>
-            <h3 className='font-bold text-foreground mb-2'>Score History</h3>
+            <div className='flex justify-between items-center mb-2'>
+              <h3 className='font-bold text-foreground'>Score History</h3>
+              <button
+                onClick={() => setSortAsc(!sortAsc)}
+                className='text-sm bg-foreground/5 text-foreground/80 font-semibold px-3 py-1 rounded-full hover:bg-foreground/10 transition-colors cursor-pointer'>
+                <FontAwesomeIcon icon={faSort} className='mr-2' />
+                Sort
+              </button>
+            </div>
             <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
-              {game.players.map((player) => (
+              {sortedPlayers.map((player) => (
                 <div key={player} className='bg-foreground/5 p-3 rounded'>
                   <h4 className='font-semibold text-primary'>{player}</h4>
-                  <ol className='list-decimal list-inside text-foreground/80 text-sm mt-1'>
-                    {/* Use optional chaining to safely map over the rounds array */}
+                  <ol className='list-decimal list-inside text-foreground/80 text-sm mt-1 space-y-1'>
                     {game.scores?.[player]?.rounds?.map((score, index) => (
-                      <li key={index}>{score} points</li>
+                      <li key={index} className='flex justify-between items-center'>
+                        <span>{score} points</span>
+                        <button
+                          onClick={() => handleOpenEditModal(player, index)}
+                          className='text-foreground/40 hover:text-primary transition-colors cursor-pointer'>
+                          <FontAwesomeIcon icon={faPen} size='xs' />
+                        </button>
+                      </li>
                     ))}
                   </ol>
                 </div>
@@ -166,6 +218,35 @@ export default function SimpleScorecard({ game: initialGame }: SimpleScorecardPr
           </div>
         </div>
       </div>
+
+      {/* Edit Score Modal */}
+      {editingScore && (
+        <div className='fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50'>
+          <div className='bg-background p-6 rounded-lg shadow-2xl w-full max-w-sm border border-border'>
+            <div className='flex justify-between items-center mb-4'>
+              <h3 className='text-lg font-bold text-foreground'>Edit Score</h3>
+              <button
+                onClick={() => setEditingScore(null)}
+                className='text-foreground/60 cursor-pointer'>
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
+            </div>
+            <input
+              type='number'
+              value={editingValue}
+              onChange={(e) => setEditingValue(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleEditScore()}
+              className='w-full p-3 bg-foreground/5 border-2 border-border rounded-lg mb-4 text-center text-2xl font-bold focus:border-primary focus:ring-1 focus:ring-primary'
+              autoFocus
+            />
+            <button
+              onClick={handleEditScore}
+              className='w-full bg-primary text-white font-bold py-3 rounded-lg hover:bg-green-700 transition-colors cursor-pointer'>
+              Save Changes
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
