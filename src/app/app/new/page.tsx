@@ -27,7 +27,6 @@ export default function NewGamePage() {
   const [step, setStep] = useState(1);
   const [gameType, setGameType] = useState<string | null>(null);
   const [players, setPlayers] = useState<string[]>([]);
-  const [playerName, setPlayerName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [holeCount, setHoleCount] = useState(9);
   const [pars, setPars] = useState<number[]>([]);
@@ -35,6 +34,7 @@ export default function NewGamePage() {
   const [showSaveCourseModal, setShowSaveCourseModal] = useState(false);
   const [courseName, setCourseName] = useState('');
   const [courseSaved, setCourseSaved] = useState(false);
+  const [selectedCourseName, setSelectedCourseName] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -52,7 +52,7 @@ export default function NewGamePage() {
     setStep(2);
   };
 
-  const handleStartGame = async (coursePars?: number[]) => {
+  const handleStartGame = async () => {
     if (!db || players.length === 0 || !gameType || isSaving) {
       return;
     }
@@ -76,6 +76,7 @@ export default function NewGamePage() {
         players,
         scores: initialScores,
         lastPlayed: Date.now(),
+        courseName: selectedCourseName || undefined,
       };
 
       if (gameType === 'Phase 10') {
@@ -87,7 +88,7 @@ export default function NewGamePage() {
       }
 
       if (gameType === 'Golf' || gameType === 'Putt-Putt') {
-        const finalPars = coursePars || pars;
+        const finalPars = pars;
         const initialGolfRounds: GolfRound[] = [];
         for (let i = 0; i < holeCount; i++) {
           initialGolfRounds.push({ par: finalPars[i] || 3 });
@@ -135,110 +136,138 @@ export default function NewGamePage() {
   const onSelectCourse = (course: CourseTemplate) => {
     setHoleCount(course.holeCount);
     setPars(course.pars);
-    // Bypassing par setup, need to collect players first
-    setStep(2.5); // Intermediate step for player entry
+    setSelectedCourseName(course.name);
+    setStep(3); // Move to player setup
+  };
+
+  const renderContent = () => {
+    switch (step) {
+      case 1:
+        return (
+          <div>
+            <h2 className='text-3xl font-bold text-foreground mb-4'>Choose a Game</h2>
+            <div className='grid grid-cols-1 gap-4'>
+              <button
+                onClick={() => handleGameSelection('Yahtzee')}
+                className='cursor-pointer text-left p-4 bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>
+                <span className='font-bold text-lg'>Yahtzee</span>
+                <FontAwesomeIcon icon={faChevronRight} />
+              </button>
+              <button
+                onClick={() => handleGameSelection('Phase 10')}
+                className='cursor-pointer text-left p-4 bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>
+                <span className='font-bold text-lg'>Phase 10</span>
+                <FontAwesomeIcon icon={faChevronRight} />
+              </button>
+              <button
+                onClick={() => handleGameSelection('Simple Score')}
+                className='cursor-pointer text-left p-4 bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>
+                <span className='font-bold text-lg'>Simple Score</span>
+                <FontAwesomeIcon icon={faChevronRight} />
+              </button>
+              <button
+                onClick={() => handleGameSelection('Golf')}
+                className='cursor-pointer text-left p-4 bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>
+                <span className='font-bold text-lg'>Golf</span>
+                <FontAwesomeIcon icon={faChevronRight} />
+              </button>
+              <button
+                onClick={() => handleGameSelection('Putt-Putt')}
+                className='cursor-pointer text-left p-4 bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>
+                <span className='font-bold text-lg'>Putt-Putt</span>
+                <FontAwesomeIcon icon={faChevronRight} />
+              </button>
+            </div>
+          </div>
+        );
+      case 2:
+        if (gameType === 'Golf' || gameType === 'Putt-Putt') {
+          return (
+            <CourseSelection
+              courses={courses}
+              onSelectCourse={onSelectCourse}
+              onNewCourse={() => setStep(4)}
+              onDeleteCourse={handleDeleteCourse}
+              onBack={() => setStep(1)}
+            />
+          );
+        }
+        // For other games, go straight to player setup
+        return (
+          <GolfScorecardSetup
+            players={players}
+            setPlayers={setPlayers}
+            setHoleCount={() => {}}
+            setStep={() => handleStartGame()}
+          />
+        );
+      case 3: // Player setup for all game types
+        return (
+          <GolfScorecardSetup
+            players={players}
+            setPlayers={setPlayers}
+            setHoleCount={() => {}}
+            setStep={() => handleStartGame()}
+          />
+        );
+      case 4: // Hole selection for new Golf/Putt-Putt course
+        return (
+          <GolfScorecardSetup
+            players={players}
+            setPlayers={setPlayers}
+            setHoleCount={setHoleCount}
+            setStep={setStep}
+          />
+        );
+      case 5: // Par setup for new Golf/Putt-Putt course
+        return (
+          <div>
+            <h2 className='text-3xl font-bold text-foreground mb-4'>Set Par for Each Hole</h2>
+            <div className='space-y-2 mb-4'>
+              {Array.from({ length: holeCount }).map((_, index) => (
+                <div key={index} className='flex items-center gap-4'>
+                  <label className='w-12 font-bold'>Hole {index + 1}:</label>
+                  <input
+                    type='number'
+                    defaultValue={3}
+                    onChange={(e) => handleParChange(index, e.target.value)}
+                    className='w-24 p-2 border rounded-lg'
+                  />
+                </div>
+              ))}
+            </div>
+            <div className='flex gap-2'>
+              {courseSaved ? (
+                <button
+                  disabled
+                  className='w-full bg-green-500 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2'>
+                  <FontAwesomeIcon icon={faCheckCircle} />
+                  Course Saved!
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowSaveCourseModal(true)}
+                  className='w-full bg-secondary text-white font-bold py-3 rounded-lg cursor-pointer'>
+                  <FontAwesomeIcon icon={faSave} className='mr-2' />
+                  Save Course
+                </button>
+              )}
+              <button
+                onClick={() => setStep(3)} // Move to player setup
+                className='w-full bg-primary text-white font-bold py-3 rounded-lg cursor-pointer'>
+                Next
+              </button>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
   };
 
   return (
     <div className='max-w-xl mx-auto p-4 sm:p-6 lg:p-8'>
-      {step === 1 && (
-        <div>
-          <h2 className='text-3xl font-bold text-foreground mb-4'>Choose a Game</h2>
-          <div className='grid grid-cols-1 gap-4'>
-            <button
-              onClick={() => handleGameSelection('Yahtzee')}
-              className='cursor-pointer text-left p-4 bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>
-              <span className='font-bold text-lg'>Yahtzee</span>
-              <FontAwesomeIcon icon={faChevronRight} />
-            </button>
-            <button
-              onClick={() => handleGameSelection('Phase 10')}
-              className='cursor-pointer text-left p-4 bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>
-              <span className='font-bold text-lg'>Phase 10</span>
-              <FontAwesomeIcon icon={faChevronRight} />
-            </button>
-            <button
-              onClick={() => handleGameSelection('Simple Score')}
-              className='cursor-pointer text-left p-4 bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>
-              <span className='font-bold text-lg'>Simple Score</span>
-              <FontAwesomeIcon icon={faChevronRight} />
-            </button>
-            <button
-              onClick={() => handleGameSelection('Golf')}
-              className='cursor-pointer text-left p-4 bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>
-              <span className='font-bold text-lg'>Golf</span>
-              <FontAwesomeIcon icon={faChevronRight} />
-            </button>
-            <button
-              onClick={() => handleGameSelection('Putt-Putt')}
-              className='cursor-pointer text-left p-4 bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>
-              <span className='font-bold text-lg'>Putt-Putt</span>
-              <FontAwesomeIcon icon={faChevronRight} />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {step === 2 && (gameType === 'Golf' || gameType === 'Putt-Putt') && (
-        <CourseSelection
-          courses={courses}
-          onSelectCourse={onSelectCourse}
-          onNewCourse={() => setStep(2.1)}
-          onDeleteCourse={handleDeleteCourse}
-        />
-      )}
-
-      {(step === 2.1 || step === 2.5) && (
-        <GolfScorecardSetup
-          players={players}
-          setPlayers={setPlayers}
-          setHoleCount={setHoleCount}
-          setStep={setStep}
-        />
-      )}
-
-      {step === 3 && (gameType === 'Golf' || gameType === 'Putt-Putt') && (
-        <div>
-          <h2 className='text-3xl font-bold text-foreground mb-4'>Set Par for Each Hole</h2>
-          <div className='space-y-2 mb-4'>
-            {Array.from({ length: holeCount }).map((_, index) => (
-              <div key={index} className='flex items-center gap-4'>
-                <label className='w-12 font-bold'>Hole {index + 1}:</label>
-                <input
-                  type='number'
-                  defaultValue={3}
-                  onChange={(e) => handleParChange(index, e.target.value)}
-                  className='w-24 p-2 border rounded-lg'
-                />
-              </div>
-            ))}
-          </div>
-          <div className='flex gap-2'>
-            {courseSaved ? (
-              <button
-                disabled
-                className='w-full bg-green-500 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2'>
-                <FontAwesomeIcon icon={faCheckCircle} />
-                Course Saved!
-              </button>
-            ) : (
-              <button
-                onClick={() => setShowSaveCourseModal(true)}
-                className='w-full bg-secondary text-white font-bold py-3 rounded-lg cursor-pointer'>
-                <FontAwesomeIcon icon={faSave} className='mr-2' />
-                Save Course
-              </button>
-            )}
-            <button
-              onClick={() => handleStartGame()}
-              disabled={isSaving}
-              className='w-full bg-primary text-white font-bold py-3 rounded-lg cursor-pointer disabled:bg-gray-400'>
-              {isSaving ? 'Saving...' : 'Start Game'}
-            </button>
-          </div>
-        </div>
-      )}
-
+      {renderContent()}
       {showSaveCourseModal && (
         <div className='fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50'>
           <div className='bg-background p-6 rounded-lg shadow-2xl w-full max-w-sm border border-border'>

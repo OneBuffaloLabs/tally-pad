@@ -43,6 +43,7 @@ export type Game = {
   phase10Rounds?: Phase10Round[];
   golfRounds?: GolfRound[];
   lastPlayed?: number;
+  courseName?: string; // Added to store the name of the saved course
 };
 
 // Defines the shape of a saved course template

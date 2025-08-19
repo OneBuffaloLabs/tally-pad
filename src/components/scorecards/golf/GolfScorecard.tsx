@@ -72,7 +72,6 @@ export default function GolfScorecard({ game: initialGame }: GolfScorecardProps)
 
   const handleFinishGame = async () => {
     if (isCompleted || !db || !game._id) return;
-    // Calculate winners before showing the modal
     const currentWinners = game.players
       .filter((p) => totals[p] === winningScore)
       .map((name) => ({ name, score: winningScore }));
@@ -91,7 +90,10 @@ export default function GolfScorecard({ game: initialGame }: GolfScorecardProps)
   return (
     <div className='p-4 sm:p-6 lg:p-8'>
       <div className='flex justify-between items-center mb-6'>
-        <h1 className='text-3xl font-bold text-foreground'>{game.name}</h1>
+        <div>
+          <h1 className='text-3xl font-bold text-foreground'>{game.name}</h1>
+          {game.courseName && <p className='text-foreground/60 mt-1'>Course: {game.courseName}</p>}
+        </div>
         <div className='flex items-center gap-2'>
           <button
             onClick={handleFinishGame}
@@ -231,7 +233,6 @@ export default function GolfScorecard({ game: initialGame }: GolfScorecardProps)
         </div>
       )}
 
-      {/* Winner Modal */}
       {showWinnerModal && (
         <div className='fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50'>
           <div className='bg-background p-8 rounded-lg shadow-2xl w-full max-w-md border border-border text-center'>

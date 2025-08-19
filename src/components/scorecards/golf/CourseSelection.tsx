@@ -1,7 +1,7 @@
 'use client';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faPlusCircle, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { CourseTemplate } from '@/types';
 
 interface CourseSelectionProps {
@@ -9,6 +9,7 @@ interface CourseSelectionProps {
   onSelectCourse: (course: CourseTemplate) => void;
   onNewCourse: () => void;
   onDeleteCourse: (course: CourseTemplate) => void;
+  onBack: () => void; // Added onBack prop
 }
 
 export default function CourseSelection({
@@ -16,10 +17,19 @@ export default function CourseSelection({
   onSelectCourse,
   onNewCourse,
   onDeleteCourse,
+  onBack, // Destructure onBack
 }: CourseSelectionProps) {
   return (
     <div>
-      <h2 className='text-3xl font-bold text-foreground mb-4'>Select a Course</h2>
+      <div className='flex justify-between items-center mb-4'>
+        <h2 className='text-3xl font-bold text-foreground'>Select a Course</h2>
+        <button
+          onClick={onBack}
+          className='text-sm text-secondary font-semibold hover:underline cursor-pointer'>
+          <FontAwesomeIcon icon={faArrowLeft} className='mr-2' />
+          Back to Games
+        </button>
+      </div>
       <div className='grid grid-cols-1 gap-4'>
         {courses.map((course) => (
           <div
