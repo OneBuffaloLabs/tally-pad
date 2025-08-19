@@ -45,5 +45,16 @@ export type Game = {
   lastPlayed?: number;
 };
 
+// Defines the shape of a saved course template
+export interface CourseTemplate {
+  _id: string;
+  _rev?: string;
+  type: 'course-template';
+  name: string;
+  gameType: 'Golf' | 'Putt-Putt';
+  holeCount: number;
+  pars: number[];
+}
+
 // A union type representing any document that can be in our database
-export type PouchDoc = Game | VersionDoc;
+export type PouchDoc = Game | VersionDoc | CourseTemplate;
