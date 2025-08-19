@@ -4,10 +4,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronRight, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { Game, Phase10Round } from '@/types';
+import { Game, Phase10Round, GolfRound } from '@/types';
 import { useDb } from '@/contexts/DbContext';
 import { createGame } from '@/lib/database';
 import { generateId } from '@/lib/utils';
+import GolfScorecardSetup from '@/components/scorecards/golf/GolfScorecardSetup';
 
 export default function NewGamePage() {
   const { db } = useDb();
@@ -16,6 +17,8 @@ export default function NewGamePage() {
   const [players, setPlayers] = useState<string[]>([]);
   const [playerName, setPlayerName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [holeCount, setHoleCount] = useState(9);
+  const [pars, setPars] = useState<number[]>([]);
   const router = useRouter();
 
   const handleGameSelection = (type: string) => {
@@ -60,7 +63,6 @@ export default function NewGamePage() {
         lastPlayed: Date.now(),
       };
 
-      // --- ADD INITIAL ROUND FOR PHASE 10 ---
       if (gameType === 'Phase 10') {
         const initialRound: Phase10Round = {};
         players.forEach((player) => {
@@ -69,12 +71,26 @@ export default function NewGamePage() {
         newGame.phase10Rounds = [initialRound];
       }
 
+      if (gameType === 'Golf' || gameType === 'Putt-Putt') {
+        const initialGolfRounds: GolfRound[] = [];
+        for (let i = 0; i < holeCount; i++) {
+          initialGolfRounds.push({ par: pars[i] || 3 });
+        }
+        newGame.golfRounds = initialGolfRounds;
+      }
+
       const response = await createGame(db, newGame);
       router.push(`/app/game?id=${response.id}`);
     } catch (error) {
       console.error('Failed to save game:', error);
       setIsSaving(false);
     }
+  };
+
+  const handleParChange = (index: number, value: string) => {
+    const newPars = [...pars];
+    newPars[index] = parseInt(value, 10);
+    setPars(newPars);
   };
 
   return (
@@ -101,11 +117,57 @@ export default function NewGamePage() {
               <span className='font-bold text-lg'>Simple Score</span>
               <FontAwesomeIcon icon={faChevronRight} />
             </button>
+            <button
+              onClick={() => handleGameSelection('Golf')}
+              className='cursor-pointer text-left p-4 bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>
+              <span className='font-bold text-lg'>Golf</span>
+              <FontAwesomeIcon icon={faChevronRight} />
+            </button>
+            <button
+              onClick={() => handleGameSelection('Putt-Putt')}
+              className='cursor-pointer text-left p-4 bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>
+              <span className='font-bold text-lg'>Putt-Putt</span>
+              <FontAwesomeIcon icon={faChevronRight} />
+            </button>
           </div>
         </div>
       )}
 
-      {step === 2 && (
+      {step === 2 && (gameType === 'Golf' || gameType === 'Putt-Putt') && (
+        <GolfScorecardSetup
+          players={players}
+          setPlayers={setPlayers}
+          setHoleCount={setHoleCount}
+          setStep={setStep}
+        />
+      )}
+
+      {step === 3 && (gameType === 'Golf' || gameType === 'Putt-Putt') && (
+        <div>
+          <h2 className='text-3xl font-bold text-foreground mb-4'>Set Par for Each Hole</h2>
+          <div className='space-y-2 mb-4'>
+            {Array.from({ length: holeCount }).map((_, index) => (
+              <div key={index} className='flex items-center gap-4'>
+                <label className='w-12 font-bold'>Hole {index + 1}:</label>
+                <input
+                  type='number'
+                  defaultValue={3}
+                  onChange={(e) => handleParChange(index, e.target.value)}
+                  className='w-24 p-2 border rounded-lg'
+                />
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={handleStartGame}
+            disabled={isSaving}
+            className='w-full bg-green-500 text-white font-bold py-3 rounded-lg cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed'>
+            {isSaving ? 'Saving...' : 'Start Game'}
+          </button>
+        </div>
+      )}
+
+      {step === 2 && gameType !== 'Golf' && gameType !== 'Putt-Putt' && (
         <div>
           <h2 className='text-3xl font-bold text-foreground mb-4'>Add Players</h2>
           <div className='flex gap-2 mb-4'>
