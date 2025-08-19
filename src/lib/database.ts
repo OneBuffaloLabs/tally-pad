@@ -1,5 +1,6 @@
-import { Game, PouchDoc, VersionDoc } from '@/types';
+import { Game, PouchDoc, VersionDoc, CourseTemplate } from '@/types';
 import type PouchDB from 'pouchdb-browser';
+import { generateId } from './utils';
 
 const DB_VERSION = 2;
 
@@ -48,7 +49,7 @@ export const initDB = async (db: PouchDB.Database<PouchDoc>) => {
 export const getAllGames = async (db: PouchDB.Database<PouchDoc>): Promise<Game[]> => {
   const result = await db.allDocs({ include_docs: true });
   return result.rows
-    .filter((row) => !row.id.startsWith('_local/') && row.doc)
+    .filter((row) => !row.id.startsWith('_local/') && row.doc && !(row.doc as CourseTemplate).type)
     .map((row) => row.doc as Game);
 };
 
@@ -95,4 +96,40 @@ export const deleteGame = async (
  */
 export const clearAllData = async (db: PouchDB.Database<PouchDoc>): Promise<void> => {
   await db.destroy();
+};
+
+// --- Course Template Functions ---
+export const saveCourseTemplate = async (
+  db: PouchDB.Database<PouchDoc>,
+  course: Omit<CourseTemplate, '_id' | '_rev' | 'type'>
+): Promise<PouchDB.Core.Response> => {
+  const newCourse: Omit<CourseTemplate, '_rev'> = {
+    _id: `course-${generateId()}`,
+    type: 'course-template',
+    ...course,
+  };
+  return db.put(newCourse);
+};
+
+export const getCourseTemplates = async (
+  db: PouchDB.Database<PouchDoc>,
+  gameType: 'Golf' | 'Putt-Putt'
+): Promise<CourseTemplate[]> => {
+  const result = await db.allDocs({ include_docs: true });
+  return result.rows
+    .filter(
+      (row) =>
+        row.doc &&
+        (row.doc as CourseTemplate).type === 'course-template' &&
+        (row.doc as CourseTemplate).gameType === gameType
+    )
+    .map((row) => row.doc as CourseTemplate);
+};
+
+export const deleteCourseTemplate = async (
+  db: PouchDB.Database<PouchDoc>,
+  courseId: string,
+  courseRev: string
+): Promise<PouchDB.Core.Response> => {
+  return db.remove(courseId, courseRev);
 };

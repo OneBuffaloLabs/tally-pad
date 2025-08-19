@@ -42,6 +42,15 @@ export default function GolfScorecard({ game: initialGame }: GolfScorecardProps)
     return scores.length > 0 ? Math.min(...scores) : 0;
   }, [totals]);
 
+  const canFinishGame = useMemo(() => {
+    if (!game.golfRounds || game.golfRounds.length === 0) return false;
+    return game.players.every(
+      (player) =>
+        game.scores?.[player]?.rounds?.length === game.golfRounds?.length &&
+        game.scores?.[player]?.rounds?.every((score) => typeof score === 'number')
+    );
+  }, [game.scores, game.players, game.golfRounds]);
+
   useEffect(() => {
     if (isCompleted) {
       const currentWinners = game.players
@@ -71,8 +80,7 @@ export default function GolfScorecard({ game: initialGame }: GolfScorecardProps)
   };
 
   const handleFinishGame = async () => {
-    if (isCompleted || !db || !game._id) return;
-    // Calculate winners before showing the modal
+    if (isCompleted || !db || !game._id || !canFinishGame) return;
     const currentWinners = game.players
       .filter((p) => totals[p] === winningScore)
       .map((name) => ({ name, score: winningScore }));
@@ -91,18 +99,21 @@ export default function GolfScorecard({ game: initialGame }: GolfScorecardProps)
   return (
     <div className='p-4 sm:p-6 lg:p-8'>
       <div className='flex justify-between items-center mb-6'>
-        <h1 className='text-3xl font-bold text-foreground'>{game.name}</h1>
+        <div>
+          <h1 className='text-3xl font-bold text-foreground'>{game.name}</h1>
+          {game.courseName && <p className='text-foreground/60 mt-1'>Course: {game.courseName}</p>}
+        </div>
         <div className='flex items-center gap-2'>
           <button
             onClick={handleFinishGame}
-            disabled={isCompleted}
+            disabled={isCompleted || !canFinishGame}
             className='bg-primary text-white font-semibold px-4 py-2 rounded-full text-sm hover:bg-green-700 transition-colors cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed'>
             <FontAwesomeIcon icon={faTrophy} className='mr-2' />
             {isCompleted ? 'Game Finished' : 'Finish Game'}
           </button>
           <Link
             href='/app'
-            className='bg-secondary/10 text-secondary font-semibold px-4 py-2 rounded-full text-sm hover:bg-secondary/20 transition-colors'>
+            className='bg-secondary/10 text-secondary font-semibold px-4 py-2 rounded-full text-sm hover:bg-secondary/20 transition-colors cursor-pointer'>
             <FontAwesomeIcon icon={faArrowLeft} className='mr-2' />
             Back to Games
           </Link>
@@ -231,7 +242,6 @@ export default function GolfScorecard({ game: initialGame }: GolfScorecardProps)
         </div>
       )}
 
-      {/* Winner Modal */}
       {showWinnerModal && (
         <div className='fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50'>
           <div className='bg-background p-8 rounded-lg shadow-2xl w-full max-w-md border border-border text-center'>
@@ -248,7 +258,7 @@ export default function GolfScorecard({ game: initialGame }: GolfScorecardProps)
             <div className='mt-8 flex flex-col sm:flex-row gap-2'>
               <Link
                 href='/app'
-                className='w-full bg-secondary text-white font-bold py-3 rounded-lg hover:bg-blue-800 transition-colors'>
+                className='w-full bg-secondary text-white font-bold py-3 rounded-lg hover:bg-blue-800 transition-colors cursor-pointer'>
                 <FontAwesomeIcon icon={faArrowLeft} className='mr-2' />
                 Back to Games
               </Link>

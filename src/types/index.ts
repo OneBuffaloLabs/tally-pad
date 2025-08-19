@@ -43,7 +43,19 @@ export type Game = {
   phase10Rounds?: Phase10Round[];
   golfRounds?: GolfRound[];
   lastPlayed?: number;
+  courseName?: string; // Added to store the name of the saved course
 };
 
+// Defines the shape of a saved course template
+export interface CourseTemplate {
+  _id: string;
+  _rev?: string;
+  type: 'course-template';
+  name: string;
+  gameType: 'Golf' | 'Putt-Putt';
+  holeCount: number;
+  pars: number[];
+}
+
 // A union type representing any document that can be in our database
-export type PouchDoc = Game | VersionDoc;
+export type PouchDoc = Game | VersionDoc | CourseTemplate;
