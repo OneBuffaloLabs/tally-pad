@@ -15,9 +15,14 @@ export interface Phase10Round {
   };
 }
 
+// Represents the scores for a single round in Golf
+export interface GolfRound {
+  par: number;
+}
+
 // A more specific type for player scores to differentiate between game types
 export interface PlayerScores {
-  // For "Simple Score" games, we expect a rounds array.
+  // For "Simple Score" and "Golf" games, we expect a rounds array.
   rounds?: number[];
   // For other games like Yahtzee, we can have various other properties.
   [category: string]: number | 'X' | null | boolean | number[] | undefined;
@@ -36,6 +41,7 @@ export type Game = {
     [player: string]: PlayerScores; // Use the more specific PlayerScores type
   };
   phase10Rounds?: Phase10Round[];
+  golfRounds?: GolfRound[];
   lastPlayed?: number;
 };
 
