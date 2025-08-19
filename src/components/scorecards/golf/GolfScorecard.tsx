@@ -6,7 +6,7 @@ import { updateGame } from '@/lib/database';
 import Link from 'next/link';
 import { Game } from '@/types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faTrophy } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faTrophy, faPlus } from '@fortawesome/free-solid-svg-icons';
 
 interface GolfScorecardProps {
   game: Game;
@@ -72,6 +72,11 @@ export default function GolfScorecard({ game: initialGame }: GolfScorecardProps)
 
   const handleFinishGame = async () => {
     if (isCompleted || !db || !game._id) return;
+    // Calculate winners before showing the modal
+    const currentWinners = game.players
+      .filter((p) => totals[p] === winningScore)
+      .map((name) => ({ name, score: winningScore }));
+    setWinners(currentWinners);
     setShowWinnerModal(true);
     await updateAndSetGame({ status: 'Completed' });
   };
@@ -221,6 +226,38 @@ export default function GolfScorecard({ game: initialGame }: GolfScorecardProps)
                 className='w-full bg-gray-500 text-white font-semibold py-3 rounded-lg hover:bg-gray-600 transition-colors cursor-pointer'>
                 Cancel
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Winner Modal */}
+      {showWinnerModal && (
+        <div className='fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50'>
+          <div className='bg-background p-8 rounded-lg shadow-2xl w-full max-w-md border border-border text-center'>
+            <FontAwesomeIcon icon={faTrophy} className='text-accent text-5xl mb-4' />
+            <h2 className='text-3xl font-bold text-foreground mb-2'>
+              {winners.length > 1 ? "It's a Tie!" : 'Winner!'}
+            </h2>
+            {winners.map((winner) => (
+              <p key={winner.name} className='text-xl text-foreground/80 mb-1'>
+                <span className='font-bold text-primary'>{winner.name}</span> with a score of{' '}
+                {winner.score}
+              </p>
+            ))}
+            <div className='mt-8 flex flex-col sm:flex-row gap-2'>
+              <Link
+                href='/app'
+                className='w-full bg-secondary text-white font-bold py-3 rounded-lg hover:bg-blue-800 transition-colors'>
+                <FontAwesomeIcon icon={faArrowLeft} className='mr-2' />
+                Back to Games
+              </Link>
+              <Link
+                href='/app/new'
+                className='w-full bg-primary text-white font-bold py-3 rounded-lg hover:bg-green-700 transition-colors'>
+                <FontAwesomeIcon icon={faPlus} className='mr-2' />
+                New Game
+              </Link>
             </div>
           </div>
         </div>
