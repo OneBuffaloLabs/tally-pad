@@ -42,6 +42,15 @@ export default function GolfScorecard({ game: initialGame }: GolfScorecardProps)
     return scores.length > 0 ? Math.min(...scores) : 0;
   }, [totals]);
 
+  const canFinishGame = useMemo(() => {
+    if (!game.golfRounds || game.golfRounds.length === 0) return false;
+    return game.players.every(
+      (player) =>
+        game.scores?.[player]?.rounds?.length === game.golfRounds?.length &&
+        game.scores?.[player]?.rounds?.every((score) => typeof score === 'number')
+    );
+  }, [game.scores, game.players, game.golfRounds]);
+
   useEffect(() => {
     if (isCompleted) {
       const currentWinners = game.players
@@ -71,7 +80,7 @@ export default function GolfScorecard({ game: initialGame }: GolfScorecardProps)
   };
 
   const handleFinishGame = async () => {
-    if (isCompleted || !db || !game._id) return;
+    if (isCompleted || !db || !game._id || !canFinishGame) return;
     const currentWinners = game.players
       .filter((p) => totals[p] === winningScore)
       .map((name) => ({ name, score: winningScore }));
@@ -97,7 +106,7 @@ export default function GolfScorecard({ game: initialGame }: GolfScorecardProps)
         <div className='flex items-center gap-2'>
           <button
             onClick={handleFinishGame}
-            disabled={isCompleted}
+            disabled={isCompleted || !canFinishGame}
             className='bg-primary text-white font-semibold px-4 py-2 rounded-full text-sm hover:bg-green-700 transition-colors cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed'>
             <FontAwesomeIcon icon={faTrophy} className='mr-2' />
             {isCompleted ? 'Game Finished' : 'Finish Game'}
