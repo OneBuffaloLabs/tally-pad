@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+![TallyPad Banner](public/assets/banners/tally-pad-banner.webp)
 
-## Getting Started
+# TallyPad: The Last Scoresheet You'll Ever Need
 
-First, run the development server:
+Welcome to TallyPad! This project is a simple, beautiful, and free scorekeeper designed for all your favorite card and board games. We built TallyPad to help you focus on the fun of game night, not the math. 🎲
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## ✨ Key Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Multiple Game Templates:** TallyPad comes with pre-built scorecards for popular games like Yahtzee, Phase 10, Golf, and Putt-Putt, plus a simple scorecard for any game.
+- **Privacy-First Design:** All your game data is stored locally in your browser. We don't collect or store any of your personal information.
+- **Mobile-Friendly:** TallyPad is designed to work beautifully on your phone, making it the perfect companion for game night on the go.
+- **Save Custom Golf Courses:** For golf and putt-putt lovers, you can save your favorite course layouts and reuse them anytime.
+- **Open Source:** TallyPad is completely free and open source. You can view the code, contribute to the project, and even host it yourself.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 💻 Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+TallyPad is built with a modern, performance-focused tech stack:
 
-## Learn More
+- **Next.js:** A powerful React framework for building fast, user-friendly web applications.
+- **TypeScript:** For writing clean, maintainable, and type-safe code.
+- **Tailwind CSS:** A utility-first CSS framework for creating beautiful, custom designs without writing a single line of custom CSS.
+- **PouchDB:** A fast, in-browser database that allows TallyPad to work completely offline.
 
-To learn more about Next.js, take a look at the following resources:
+## 🚀 Getting Started
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+To get a local copy up and running, follow these simple steps.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Prerequisites
 
-## Deploy on Vercel
+- Node.js (v20 or higher)
+- npm, yarn, or pnpm
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Installation
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1.  Clone the repo
+    ```sh
+    git clone [https://github.com/onebuffalolabs/tally-pad.git](https://github.com/onebuffalolabs/tally-pad.git)
+    ```
+2.  Install NPM packages
+    ```sh
+    npm install
+    ```
+3.  Run the development server
+    ```sh
+    npm run dev
+    ```
+
+## Built with ❤️ by One Buffalo Labs
+
+TallyPad is a passion project from [One Buffalo Labs](https://onebuffalolabs.com), a digital product studio that loves building cool stuff. We hope you enjoy using it as much as we enjoyed building it!
