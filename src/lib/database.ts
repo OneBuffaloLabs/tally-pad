@@ -49,7 +49,7 @@ export const initDB = async (db: PouchDB.Database<PouchDoc>) => {
 export const getAllGames = async (db: PouchDB.Database<PouchDoc>): Promise<Game[]> => {
   const result = await db.allDocs({ include_docs: true });
   return result.rows
-    .filter((row) => !row.id.startsWith('_local/') && row.doc && !(row.doc as any).type)
+    .filter((row) => !row.id.startsWith('_local/') && row.doc && !(doc as CourseTemplate).type)
     .map((row) => row.doc as Game);
 };
 
@@ -120,7 +120,7 @@ export const getCourseTemplates = async (
     .filter(
       (row) =>
         row.doc &&
-        (row.doc as any).type === 'course-template' &&
+        (row.doc as CourseTemplate).type === 'course-template' &&
         (row.doc as CourseTemplate).gameType === gameType
     )
     .map((row) => row.doc as CourseTemplate);
