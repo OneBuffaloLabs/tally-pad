@@ -71,7 +71,7 @@ export default function NewGamePage() {
         newGame.phase10Rounds = [initialRound];
       }
 
-      if (gameType === 'Golf') {
+      if (gameType === 'Golf' || gameType === 'Putt-Putt') {
         const initialGolfRounds: GolfRound[] = [];
         for (let i = 0; i < holeCount; i++) {
           initialGolfRounds.push({ par: pars[i] || 3 });
@@ -123,11 +123,17 @@ export default function NewGamePage() {
               <span className='font-bold text-lg'>Golf</span>
               <FontAwesomeIcon icon={faChevronRight} />
             </button>
+            <button
+              onClick={() => handleGameSelection('Putt-Putt')}
+              className='cursor-pointer text-left p-4 bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all flex justify-between items-center'>
+              <span className='font-bold text-lg'>Putt-Putt</span>
+              <FontAwesomeIcon icon={faChevronRight} />
+            </button>
           </div>
         </div>
       )}
 
-      {step === 2 && gameType === 'Golf' && (
+      {step === 2 && (gameType === 'Golf' || gameType === 'Putt-Putt') && (
         <GolfScorecardSetup
           players={players}
           setPlayers={setPlayers}
@@ -136,7 +142,7 @@ export default function NewGamePage() {
         />
       )}
 
-      {step === 3 && gameType === 'Golf' && (
+      {step === 3 && (gameType === 'Golf' || gameType === 'Putt-Putt') && (
         <div>
           <h2 className='text-3xl font-bold text-foreground mb-4'>Set Par for Each Hole</h2>
           <div className='space-y-2 mb-4'>
@@ -161,7 +167,7 @@ export default function NewGamePage() {
         </div>
       )}
 
-      {step === 2 && gameType !== 'Golf' && (
+      {step === 2 && gameType !== 'Golf' && gameType !== 'Putt-Putt' && (
         <div>
           <h2 className='text-3xl font-bold text-foreground mb-4'>Add Players</h2>
           <div className='flex gap-2 mb-4'>

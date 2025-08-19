@@ -47,7 +47,7 @@ const GamePageContent = () => {
     return <Phase10Scorecard game={game} />;
   } else if (game.name === 'Yahtzee') {
     return <YahtzeeScorecard game={game} />;
-  } else if (game.name === 'Golf') {
+  } else if (game.name === 'Golf' || game.name === 'Putt-Putt') {
     return <GolfScorecard game={game} />;
   }
 
