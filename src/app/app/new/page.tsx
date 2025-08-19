@@ -3,13 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faChevronRight,
-  faTrash,
-  faSave,
-  faTimes,
-  faCheckCircle,
-} from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faSave, faTimes, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import { Game, Phase10Round, GolfRound, CourseTemplate } from '@/types';
 import { useDb } from '@/contexts/DbContext';
 import {
@@ -19,8 +13,8 @@ import {
   deleteCourseTemplate,
 } from '@/lib/database';
 import { generateId } from '@/lib/utils';
-import GolfScorecardSetup from '@/components/scorecards/golf/GolfScorecardSetup';
 import CourseSelection from '@/components/scorecards/golf/CourseSelection';
+import PlayerSetup from '@/components/scorecards/PlayerSetup';
 
 export default function NewGamePage() {
   const { db } = useDb();
@@ -192,34 +186,50 @@ export default function NewGamePage() {
             />
           );
         }
-        // For other games, go straight to player setup
         return (
-          <GolfScorecardSetup
+          <PlayerSetup
+            gameType={gameType || ''}
             players={players}
             setPlayers={setPlayers}
-            setHoleCount={() => {}}
-            setStep={() => handleStartGame()}
+            onBack={() => setStep(1)}
+            onNext={handleStartGame}
           />
         );
-      case 3: // Player setup for all game types
+      case 3:
         return (
-          <GolfScorecardSetup
+          <PlayerSetup
+            gameType={gameType || ''}
             players={players}
             setPlayers={setPlayers}
-            setHoleCount={() => {}}
-            setStep={() => handleStartGame()}
+            onBack={() => setStep(2)}
+            onNext={handleStartGame}
           />
         );
-      case 4: // Hole selection for new Golf/Putt-Putt course
+      case 4:
         return (
-          <GolfScorecardSetup
-            players={players}
-            setPlayers={setPlayers}
-            setHoleCount={setHoleCount}
-            setStep={setStep}
-          />
+          <div>
+            <h2 className='text-3xl font-bold text-foreground my-4'>Choose Number of Holes</h2>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              <button
+                onClick={() => {
+                  setHoleCount(9);
+                  setStep(5);
+                }}
+                className='cursor-pointer text-left p-4 bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all'>
+                9 Holes
+              </button>
+              <button
+                onClick={() => {
+                  setHoleCount(18);
+                  setStep(5);
+                }}
+                className='cursor-pointer text-left p-4 bg-foreground/5 rounded-lg border border-border shadow-sm hover:shadow-lg transition-all'>
+                18 Holes
+              </button>
+            </div>
+          </div>
         );
-      case 5: // Par setup for new Golf/Putt-Putt course
+      case 5:
         return (
           <div>
             <h2 className='text-3xl font-bold text-foreground mb-4'>Set Par for Each Hole</h2>
@@ -253,7 +263,7 @@ export default function NewGamePage() {
                 </button>
               )}
               <button
-                onClick={() => setStep(3)} // Move to player setup
+                onClick={() => setStep(3)}
                 className='w-full bg-primary text-white font-bold py-3 rounded-lg cursor-pointer'>
                 Next
               </button>

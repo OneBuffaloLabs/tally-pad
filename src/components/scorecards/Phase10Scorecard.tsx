@@ -344,7 +344,7 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
             <div className='mt-8 flex flex-col sm:flex-row gap-2'>
               <Link
                 href='/app'
-                className='w-full bg-secondary text-white font-bold py-3 rounded-lg hover:bg-blue-800 transition-colors'>
+                className='w-full bg-secondary text-white font-bold py-3 rounded-lg hover:bg-blue-800 transition-colors cursor-pointer'>
                 <FontAwesomeIcon icon={faArrowLeft} className='mr-2' />
                 Back to Games
               </Link>
