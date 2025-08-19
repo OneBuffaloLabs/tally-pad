@@ -28,12 +28,19 @@ export default function GolfScorecard({ game: initialGame }: GolfScorecardProps)
     const playerTotals: { [key: string]: number } = {};
     game.players.forEach((player) => {
       const playerScores = game.scores?.[player]?.rounds || [];
-      playerTotals[player] = playerScores.reduce((acc, score) => acc + score, 0);
+      playerTotals[player] = playerScores.reduce((acc, score) => acc + (score || 0), 0);
     });
     return playerTotals;
   }, [game.scores, game.players]);
 
-  const winningScore = useMemo(() => Math.min(Infinity, ...Object.values(totals)), [totals]);
+  const totalPar = useMemo(() => {
+    return (game.golfRounds || []).reduce((acc, round) => acc + round.par, 0);
+  }, [game.golfRounds]);
+
+  const winningScore = useMemo(() => {
+    const scores = Object.values(totals);
+    return scores.length > 0 ? Math.min(...scores) : 0;
+  }, [totals]);
 
   useEffect(() => {
     if (isCompleted) {
@@ -121,19 +128,19 @@ export default function GolfScorecard({ game: initialGame }: GolfScorecardProps)
           isCompleted ? 'opacity-75 pointer-events-none' : ''
         }`}>
         <table className='min-w-full bg-foreground/5 border-collapse'>
-          <thead>
-            <tr className='bg-foreground/10'>
-              <th className='p-3 text-left font-bold text-secondary text-sm tracking-wider w-1/4 border-b-2 border-border'>
+          <thead className='bg-secondary text-white font-extrabold text-lg'>
+            <tr>
+              <th className='p-3 text-center font-bol tracking-wider w-1/4 border-b-2 border-border'>
                 Hole
               </th>
-              <th className='p-3 text-left font-bold text-secondary text-sm tracking-wider w-1/4 border-b-2 border-border'>
+              <th className='p-3 text-center font-bol tracking-wider w-1/4 border-b-2 border-border'>
                 Par
               </th>
               {game.players.map((player) => (
                 <th
                   key={player}
-                  className={`p-3 font-bold text-secondary text-sm tracking-wider text-center border-b-2 border-border ${
-                    totals[player] === winningScore ? 'text-accent' : ''
+                  className={`p-3 font-bold tracking-wider text-center border-b-2 border-border ${
+                    totals[player] === winningScore && !isCompleted ? 'text-accent' : ''
                   }`}>
                   {player}
                 </th>
@@ -143,10 +150,10 @@ export default function GolfScorecard({ game: initialGame }: GolfScorecardProps)
           <tbody>
             {game.golfRounds?.map((round, index) => (
               <tr key={index} className={index % 2 === 0 ? 'bg-foreground/5' : 'bg-foreground/10'}>
-                <td className='p-3 font-semibold text-foreground/80 border-b border-border'>
+                <td className='p-3 text-center font-semibold text-foreground/80 border-b border-border'>
                   {index + 1}
                 </td>
-                <td className='p-3 text-foreground/60 text-sm border-b border-border'>
+                <td className='p-3 text-center text-foreground/60 border-b border-border'>
                   {round.par}
                 </td>
                 {game.players.map((player) => (
@@ -164,9 +171,8 @@ export default function GolfScorecard({ game: initialGame }: GolfScorecardProps)
           </tbody>
           <tfoot className='bg-secondary text-white font-extrabold text-lg'>
             <tr>
-              <td className='p-4' colSpan={2}>
-                Grand Total
-              </td>
+              <td className='p-4 text-center'>Grand Total</td>
+              <td className='p-4 text-center'>{totalPar}</td>
               {game.players.map((player) => (
                 <td key={player} className='p-4 text-center'>
                   {totals[player] ?? 0}
