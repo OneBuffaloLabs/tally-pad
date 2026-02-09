@@ -1,11 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+// --- React ---
+import { useState, useEffect, useRef } from 'react';
+// --- Next/Router ---
 import { useRouter } from 'next/navigation';
+// --- Icons ---
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronRight, faSave, faTimes, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
+// --- Types ---
 import { Game, Phase10Round, GolfRound, CourseTemplate } from '@/types';
+// --- Context ---
 import { useDb } from '@/contexts/DbContext';
+// --- Helpers ---
 import {
   createGame,
   saveCourseTemplate,
@@ -13,15 +19,21 @@ import {
   deleteCourseTemplate,
 } from '@/lib/database';
 import { generateId } from '@/lib/utils';
+// --- Components ---
 import CourseSelection from '@/components/scorecards/golf/CourseSelection';
 import PlayerSetup from '@/components/scorecards/PlayerSetup';
 
 export default function NewGamePage() {
   const { db } = useDb();
+  const router = useRouter();
+
+  // --- State ---
   const [step, setStep] = useState(1);
   const [gameType, setGameType] = useState<string | null>(null);
   const [players, setPlayers] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Golf Specific State
   const [holeCount, setHoleCount] = useState(9);
   const [pars, setPars] = useState<number[]>([]);
   const [courses, setCourses] = useState<CourseTemplate[]>([]);
@@ -29,8 +41,11 @@ export default function NewGamePage() {
   const [courseName, setCourseName] = useState('');
   const [courseSaved, setCourseSaved] = useState(false);
   const [selectedCourseName, setSelectedCourseName] = useState<string | null>(null);
-  const router = useRouter();
 
+  // --- Refs ---
+  const saveCourseInputRef = useRef<HTMLInputElement>(null);
+
+  // --- Effects ---
   useEffect(() => {
     const fetchCourses = async () => {
       if (db && (gameType === 'Golf' || gameType === 'Putt-Putt')) {
@@ -41,6 +56,14 @@ export default function NewGamePage() {
     fetchCourses();
   }, [db, gameType]);
 
+  // Focus the input when the save course modal opens
+  useEffect(() => {
+    if (showSaveCourseModal && saveCourseInputRef.current) {
+      saveCourseInputRef.current.focus();
+    }
+  }, [showSaveCourseModal]);
+
+  // --- Handlers ---
   const handleGameSelection = (type: string) => {
     setGameType(type);
     setStep(2);
@@ -290,12 +313,12 @@ export default function NewGamePage() {
               </button>
             </div>
             <input
+              ref={saveCourseInputRef}
               type='text'
               value={courseName}
               onChange={(e) => setCourseName(e.target.value)}
               placeholder='e.g., "Oak Hill East"'
               className='w-full p-3 bg-foreground/5 border-2 border-border rounded-lg mb-4 text-xl font-bold focus:border-primary focus:ring-1 focus:ring-primary'
-              autoFocus
             />
             <button
               onClick={handleSaveCourse}

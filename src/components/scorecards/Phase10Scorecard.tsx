@@ -1,36 +1,48 @@
 'use client';
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
+// --- React ---
+import { useState, useMemo, useEffect, useRef } from 'react';
+// --- Context ---
 import { useDb } from '@/contexts/DbContext';
+// --- Helpers ---
 import { getGame, updateGame } from '@/lib/database';
+// --- Next/Router ---
 import Link from 'next/link';
+// --- Types ---
 import { Game, Phase10Round } from '@/types';
+// --- Icons ---
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faTrophy, faPlus, faCheck, faTrash } from '@fortawesome/free-solid-svg-icons';
 
-// --- Type Definitions for this Component ---
+// --- Interfaces ---
 interface Phase10ScorecardProps {
   game: Game;
 }
+
 interface PlayerStats {
   totalScore: number;
   currentPhase: number;
 }
 
-// --- Reusable Components ---
-const ScoreInputModal = ({
-  player,
-  round,
-  onSave,
-  onClose,
-}: {
+interface ScoreInputModalProps {
   player: string;
   round: Phase10Round;
   onSave: (score: number, phaseCompleted: boolean) => void;
   onClose: () => void;
-}) => {
+}
+
+// --- Components ---
+
+const ScoreInputModal = ({ player, round, onSave, onClose }: ScoreInputModalProps) => {
   const [score, setScore] = useState(round[player]?.score.toString() || '');
   const [phaseCompleted, setPhaseCompleted] = useState(round[player]?.phaseCompleted || false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
 
   return (
     <div className='fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50'>
@@ -39,12 +51,12 @@ const ScoreInputModal = ({
           Enter Score for <span className='text-primary'>{player}</span>
         </h3>
         <input
+          ref={inputRef}
           type='number'
           value={score}
           onChange={(e) => e.target.value.length <= 3 && setScore(e.target.value)}
           className='w-full p-3 bg-foreground/5 border-2 border-border rounded-lg mb-4 text-center text-2xl font-bold focus:border-primary focus:ring-1 focus:ring-primary'
           placeholder='0'
-          autoFocus
         />
         <div className='flex items-center gap-4 mb-6'>
           <input
@@ -80,14 +92,15 @@ const ScoreInputModal = ({
 export default function Phase10Scorecard({ game: initialGame }: Phase10ScorecardProps) {
   const { db } = useDb();
   const [game, setGame] = useState(initialGame);
-  const [editingCell, setEditingCell] = useState<{
-    player: string;
-    roundIndex: number;
-  } | null>(null);
+  const [editingCell, setEditingCell] = useState<{ player: string; roundIndex: number } | null>(
+    null
+  );
   const [showWinnerModal, setShowWinnerModal] = useState(false);
-  const [winners, setWinners] = useState<{ name: string; score: number }[]>([]);
+
   const isCompleted = game.status === 'Completed';
   const roundCount = game.phase10Rounds?.length || 0;
+
+  // --- Derived State ---
 
   const playerStats = useMemo<Record<string, PlayerStats>>(() => {
     const stats: Record<string, PlayerStats> = {};
@@ -112,7 +125,10 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
     [playerStats]
   );
 
-  const calculateWinners = useCallback(() => {
+  const winners = useMemo(() => {
+    // Only calculate winners if the game is actually completed or ready to be
+    if (!isCompleted && !canFinishGame) return [];
+
     const completers = game.players.filter((p) => (playerStats[p]?.currentPhase ?? 0) > 10);
 
     if (completers.length > 0) {
@@ -127,34 +143,25 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
           currentWinners.push({ name: player, score: playerScore });
         }
       });
-      setWinners(currentWinners);
+      return currentWinners;
     }
-  }, [game.players, playerStats]);
+    return [];
+  }, [isCompleted, canFinishGame, game.players, playerStats]);
 
-  useEffect(() => {
-    if (isCompleted) {
-      calculateWinners();
-    }
-  }, [isCompleted, calculateWinners]);
+  // --- Actions ---
 
   const updateAndSetGame = async (updates: Partial<Game>) => {
     if (!db || !game._id) return;
 
     try {
-      // Add lastPlayed timestamp to every update
       const updatesWithTimestamp = { ...updates, lastPlayed: Date.now() };
       const response = await updateGame(db, game._id, updatesWithTimestamp);
-      setGame((currentGame) => ({
-        ...currentGame,
-        ...updatesWithTimestamp,
-        _rev: response.rev,
-      }));
+      setGame((currentGame) => ({ ...currentGame, ...updatesWithTimestamp, _rev: response.rev }));
     } catch (error) {
       console.error('Failed to update game:', error);
-      // If a conflict occurs, refetch the latest game state to resolve it
       if ((error as { name?: string }).name === 'conflict' && game._id) {
         const freshGame = await getGame(db, game._id);
-        setGame(freshGame);
+        if (freshGame) setGame(freshGame);
       }
     }
   };
@@ -170,7 +177,7 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
   };
 
   const handleRemoveRound = () => {
-    if (isCompleted || roundCount <= 1) return; // Prevent removing the last round
+    if (isCompleted || roundCount <= 1) return;
     const newRounds = (game.phase10Rounds || []).slice(0, -1);
     updateAndSetGame({ phase10Rounds: newRounds });
   };
@@ -182,6 +189,7 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
     phaseCompleted: boolean
   ) => {
     const newRounds = JSON.parse(JSON.stringify(game.phase10Rounds || []));
+    if (!newRounds[roundIndex]) newRounds[roundIndex] = {};
     newRounds[roundIndex][player] = { score, phaseCompleted };
     updateAndSetGame({ phase10Rounds: newRounds });
     setEditingCell(null);
@@ -189,7 +197,6 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
 
   const handleFinishGame = async () => {
     if (isCompleted || !canFinishGame || !db || !game._id) return;
-    calculateWinners();
     setShowWinnerModal(true);
     await updateAndSetGame({ status: 'Completed' });
   };
@@ -223,7 +230,7 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
           </button>
           <Link
             href='/app'
-            className='bg-gray-200 text-foregroundfont-semibold px-4 py-2 rounded-full text-sm hover:bg-foreground/20 transition-colors'>
+            className='bg-gray-200 text-foreground font-semibold px-4 py-2 rounded-full text-sm hover:bg-foreground/20 transition-colors'>
             <FontAwesomeIcon icon={faArrowLeft} className='mr-2' />
             Back
           </Link>
@@ -321,7 +328,7 @@ export default function Phase10Scorecard({ game: initialGame }: Phase10Scorecard
       {editingCell && (
         <ScoreInputModal
           player={editingCell.player}
-          round={(game.phase10Rounds || [])[editingCell.roundIndex]}
+          round={(game.phase10Rounds || [])[editingCell.roundIndex] || {}}
           onSave={(score, phaseCompleted) =>
             handleScoreChange(editingCell.player, editingCell.roundIndex, score, phaseCompleted)
           }

@@ -1,13 +1,14 @@
 {
   "name": "tally-pad",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "dev:turbo": "next dev --turbopack",
-    "build": "next build && npm run sitemap",
+    "build": "next build --webpack && npm run sitemap",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "sitemap": "next-sitemap && node sitemap-fix.js"
   },
   "dependencies": {
@@ -16,26 +17,31 @@
     "@fortawesome/free-regular-svg-icons": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
-    "next": "15.4.5",
+    "next": "^16.1.4",
     "pouchdb-browser": "^9.0.0",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "react-ga4": "^2.1.0",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
+    "@eslint/js": "^9.39.2",
+    "@next/eslint-plugin-next": "^16.1.4",
     "@tailwindcss/postcss": "^4",
-    "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^20",
-    "@types/pouchdb-browser": "^6.1.5",
+    "@tailwindcss/typography": "^0.5.16",
+    "@types/pouchdb": "^6.4.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@types/uuid": "^10.0.0",
     "eslint": "^9",
-    "eslint-config-next": "15.4.5",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "globals": "^17.1.0",
     "next-sitemap": "^4.2.3",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "typescript-eslint": "^8.53.1",
+    "@types/uuid": "^10.0.0"
   }
 }
