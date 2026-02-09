@@ -1,7 +1,10 @@
 'use client';
 
+// --- React ---
 import React from 'react';
+// --- Next/Router ---
 import Link from 'next/link';
+// --- Icons ---
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowLeft,
@@ -103,7 +106,7 @@ export default function ChangelogPage() {
               <FontAwesomeIcon icon={faArrowLeft} />
             </Link>
             <h1 className='text-xl font-bold flex items-center gap-2'>
-              <span className='text-primary'>What's New</span>
+              <span className='text-primary'>What&apos;s New</span>
               <span className='text-foreground/40 font-normal text-sm hidden sm:inline-block'>
                 | TallyPad Updates
               </span>
@@ -191,23 +194,25 @@ export default function ChangelogPage() {
 
         {/* Footer Message */}
         <div className='text-center mt-16 pb-8'>
-          <p className='text-foreground/40 text-sm'>That's all for now. Go play some games!</p>
+          <p className='text-foreground/40 text-sm'>That&apos;s all for now. Go play some games!</p>
         </div>
       </main>
 
       {/* Animation Styles */}
-      <style jsx global>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
+      <style>
+        {`
+          @keyframes fadeIn {
+            from {
+              opacity: 0;
+              transform: translateY(10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
           }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 }

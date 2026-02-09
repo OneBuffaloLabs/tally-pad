@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-02-10
+
+### Added
+
+- **Hearts Support:** Added a dedicated scorecard for the classic card game _Hearts_.
+  - **"Shoot the Moon" Logic:** implemented a specialized checkbox that automatically assigns 0 points to the active player and 26 points to all opponents when checked.
+  - **Round Tracking:** Supports standard round-by-round scoring for 3 to 6 players.
+  - **Leader Highlighting:** Automatically highlights the player with the lowest score (the current leader) in real-time.
+
 ## [1.1.0] - 2026-02-09
 
 ### Changed
