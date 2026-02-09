@@ -15,6 +15,12 @@ export interface HeartsRound {
   [player: string]: { score: number; shotTheMoon: boolean };
 }
 
+// Represents the scores for a single round in Spades
+export interface SpadesRound {
+  team1: { bid: number; tricks: number; bags: number; score: number };
+  team2: { bid: number; tricks: number; bags: number; score: number };
+}
+
 // Represents the scores for a single round in Golf
 export interface GolfRound {
   par: number;
@@ -41,10 +47,11 @@ export type Game = {
     [player: string]: PlayerScores; // Use the more specific PlayerScores type
   };
   phase10Rounds?: Phase10Round[];
-  heartsRounds?: HeartsRound[]; // Added for Hearts support
+  heartsRounds?: HeartsRound[];
+  spadesRounds?: SpadesRound[];
   golfRounds?: GolfRound[];
   lastPlayed?: number;
-  courseName?: string; // Added to store the name of the saved course
+  courseName?: string;
 };
 
 // Defines the shape of a saved course template

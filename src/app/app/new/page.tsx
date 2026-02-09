@@ -54,6 +54,12 @@ export default function NewGamePage() {
   // --- Handlers ---
   const handleGameSelection = (type: string) => {
     setGameType(type);
+
+    // Spades requires exactly 4 players
+    if (type === 'Spades') {
+      setPlayers(['', '', '', '']);
+    }
+
     setStep(2);
   };
 
@@ -61,6 +67,13 @@ export default function NewGamePage() {
     if (!db || players.length === 0 || !gameType || isSaving) {
       return;
     }
+
+    // Validation for Spades
+    if (gameType === 'Spades' && players.length !== 4) {
+      alert('Spades requires exactly 4 players.');
+      return;
+    }
+
     setIsSaving(true);
 
     try {
@@ -98,6 +111,10 @@ export default function NewGamePage() {
           initialRound[player] = { score: 0, shotTheMoon: false };
         });
         newGame.heartsRounds = [initialRound];
+      }
+
+      if (gameType === 'Spades') {
+        newGame.spadesRounds = [];
       }
 
       if (gameType === 'Golf' || gameType === 'Putt-Putt') {

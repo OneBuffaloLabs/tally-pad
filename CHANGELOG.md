@@ -12,9 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Hearts Support:** Added a dedicated scorecard for the classic card game _Hearts_.
-  - **"Shoot the Moon" Logic:** implemented a specialized checkbox that automatically assigns 0 points to the active player and 26 points to all opponents when checked.
+  - **"Shoot the Moon" Logic:** Implemented a specialized checkbox that automatically assigns 0 points to the active player and 26 points to all opponents when checked.
   - **Round Tracking:** Supports standard round-by-round scoring for 3 to 6 players.
   - **Leader Highlighting:** Automatically highlights the player with the lowest score (the current leader) in real-time.
+- **Spades Support:** Added a dedicated scorecard for the partnership card game _Spades_.
+  - **Team Scoring:** Automatically pairs 4 players into two teams (Team 1 & Team 2) for streamlined scorekeeping.
+  - **Bid & Bag Tracking:** Interface for inputting team bids and actual tricks taken, with automatic calculation of round scores and bag accumulation.
+  - **Penalty Automation:** Built-in logic handles complex scoring rules, including -100 point penalties for failing bids or accumulating 10 bags.
 
 ## [1.1.0] - 2026-02-09
 

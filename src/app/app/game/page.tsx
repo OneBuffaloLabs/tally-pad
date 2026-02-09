@@ -19,6 +19,7 @@ import Phase10Scorecard from '@/components/scorecards/Phase10Scorecard';
 import SimpleScorecard from '@/components/scorecards/SimpleScorecard';
 import GolfScorecard from '@/components/scorecards/golf/GolfScorecard';
 import HeartsScorecard from '@/components/scorecards/HeartsScorecard';
+import SpadesScorecard from '@/components/scorecards/SpadesScorecard';
 
 // A component that uses useSearchParams must be wrapped in a Suspense boundary.
 const GamePageContent = () => {
@@ -58,6 +59,8 @@ const GamePageContent = () => {
     return <GolfScorecard game={game} />;
   } else if (game.name === 'Hearts') {
     return <HeartsScorecard game={game} />;
+  } else if (game.name === 'Spades') {
+    return <SpadesScorecard game={game} />;
   }
 
   // Placeholder for other game types

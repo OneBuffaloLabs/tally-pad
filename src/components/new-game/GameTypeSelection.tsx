@@ -7,7 +7,7 @@ interface GameTypeSelectionProps {
   onSelect: (type: string) => void;
 }
 
-const GAMES = ['Yahtzee', 'Phase 10', 'Hearts', 'Simple Score', 'Golf', 'Putt-Putt'];
+const GAMES = ['Yahtzee', 'Phase 10', 'Spades', 'Hearts', 'Simple Score', 'Golf', 'Putt-Putt'];
 
 export default function GameTypeSelection({ onSelect }: GameTypeSelectionProps) {
   return (
