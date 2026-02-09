@@ -1,10 +1,16 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
-import { useDb } from '@/contexts/DbContext';
-import { updateGame } from '@/lib/database';
+// --- React ---
+import { useState, useMemo, useEffect, useRef } from 'react';
+// --- Next/Router ---
 import Link from 'next/link';
+// --- Context ---
+import { useDb } from '@/contexts/DbContext';
+// --- Helpers ---
+import { updateGame } from '@/lib/database';
+// --- Types ---
 import { Game } from '@/types';
+// --- Icons ---
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faTrophy, faPlus } from '@fortawesome/free-solid-svg-icons';
 
@@ -15,13 +21,15 @@ interface GolfScorecardProps {
 export default function GolfScorecard({ game: initialGame }: GolfScorecardProps) {
   const { db } = useDb();
   const [game, setGame] = useState(initialGame);
-  const [editingCell, setEditingCell] = useState<{
-    player: string;
-    holeIndex: number;
-  } | null>(null);
+  const [editingCell, setEditingCell] = useState<{ player: string; holeIndex: number } | null>(
+    null
+  );
   const [scoreInput, setScoreInput] = useState('');
   const [showWinnerModal, setShowWinnerModal] = useState(false);
-  const [winners, setWinners] = useState<{ name: string; score: number }[]>([]);
+
+  // Ref for managing focus accessibly
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const isCompleted = game.status === 'Completed';
 
   const totals = useMemo(() => {
@@ -42,6 +50,14 @@ export default function GolfScorecard({ game: initialGame }: GolfScorecardProps)
     return scores.length > 0 ? Math.min(...scores) : 0;
   }, [totals]);
 
+  // Derived state for winners prevents cascading renders
+  const winners = useMemo(() => {
+    if (!isCompleted) return [];
+    return game.players
+      .filter((p) => totals[p] === winningScore)
+      .map((name) => ({ name, score: winningScore }));
+  }, [isCompleted, game.players, totals, winningScore]);
+
   const canFinishGame = useMemo(() => {
     if (!game.golfRounds || game.golfRounds.length === 0) return false;
     return game.players.every(
@@ -51,14 +67,12 @@ export default function GolfScorecard({ game: initialGame }: GolfScorecardProps)
     );
   }, [game.scores, game.players, game.golfRounds]);
 
+  // Focus the input when editing starts
   useEffect(() => {
-    if (isCompleted) {
-      const currentWinners = game.players
-        .filter((p) => totals[p] === winningScore)
-        .map((name) => ({ name, score: winningScore }));
-      setWinners(currentWinners);
+    if (editingCell && inputRef.current) {
+      inputRef.current.focus();
     }
-  }, [isCompleted, game.players, totals, winningScore]);
+  }, [editingCell]);
 
   const updateAndSetGame = async (updates: Partial<Game>) => {
     if (!db || !game._id) return;
@@ -81,10 +95,6 @@ export default function GolfScorecard({ game: initialGame }: GolfScorecardProps)
 
   const handleFinishGame = async () => {
     if (isCompleted || !db || !game._id || !canFinishGame) return;
-    const currentWinners = game.players
-      .filter((p) => totals[p] === winningScore)
-      .map((name) => ({ name, score: winningScore }));
-    setWinners(currentWinners);
     setShowWinnerModal(true);
     await updateAndSetGame({ status: 'Completed' });
   };
@@ -146,10 +156,10 @@ export default function GolfScorecard({ game: initialGame }: GolfScorecardProps)
         <table className='min-w-full bg-foreground/5 border-collapse'>
           <thead className='bg-secondary text-white font-extrabold text-lg'>
             <tr>
-              <th className='p-3 text-center font-bol tracking-wider w-1/4 border-b-2 border-border'>
+              <th className='p-3 text-center font-bold tracking-wider w-1/4 border-b-2 border-border'>
                 Hole
               </th>
-              <th className='p-3 text-center font-bol tracking-wider w-1/4 border-b-2 border-border'>
+              <th className='p-3 text-center font-bold tracking-wider w-1/4 border-b-2 border-border'>
                 Par
               </th>
               {game.players.map((player) => (
@@ -209,6 +219,7 @@ export default function GolfScorecard({ game: initialGame }: GolfScorecardProps)
               For <span className='font-bold text-primary'>{editingCell.player}</span>
             </p>
             <input
+              ref={inputRef}
               type='number'
               value={scoreInput}
               onChange={(e) => {
@@ -218,7 +229,6 @@ export default function GolfScorecard({ game: initialGame }: GolfScorecardProps)
               }}
               className='w-full p-3 bg-foreground/5 border-2 border-border rounded-lg mb-4 text-center text-2xl font-bold focus:border-primary focus:ring-1 focus:ring-primary'
               placeholder='0'
-              autoFocus
             />
             <div className='grid grid-cols-2 gap-2'>
               <button

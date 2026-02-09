@@ -1,10 +1,16 @@
 'use client';
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
+// --- React ---
+import { useState, useMemo, useEffect, useRef } from 'react';
+// --- Context ---
 import { useDb } from '@/contexts/DbContext';
+// --- Helpers ---
 import { updateGame } from '@/lib/database';
+// --- Next/Router ---
 import Link from 'next/link';
+// --- Types ---
 import { Game } from '@/types';
+// --- Icons ---
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowLeft,
@@ -22,19 +28,27 @@ interface SimpleScorecardProps {
 
 export default function SimpleScorecard({ game: initialGame }: SimpleScorecardProps) {
   const { db } = useDb();
+
+  // --- State ---
   const [game, setGame] = useState(initialGame);
   const [scoreInput, setScoreInput] = useState('');
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
-  const [sortedPlayers, setSortedPlayers] = useState<string[]>(initialGame.players);
   const [sortAsc, setSortAsc] = useState(false);
-  const [editingScore, setEditingScore] = useState<{
-    player: string;
-    index: number;
-  } | null>(null);
+
+  // Edit Modal State
+  const [editingScore, setEditingScore] = useState<{ player: string; index: number } | null>(null);
   const [editingValue, setEditingValue] = useState('');
+
+  // Winner Modal State
   const [showWinnerModal, setShowWinnerModal] = useState(false);
-  const [winners, setWinners] = useState<{ name: string; score: number }[]>([]);
+
+  // Refs for accessible focus management
+  const scoreInputRef = useRef<HTMLInputElement>(null);
+  const editInputRef = useRef<HTMLInputElement>(null);
+
   const isCompleted = game.status === 'Completed';
+
+  // --- Derived State (Replaces sync useEffects) ---
 
   const totals = useMemo(() => {
     const playerTotals: { [key: string]: number } = {};
@@ -47,36 +61,49 @@ export default function SimpleScorecard({ game: initialGame }: SimpleScorecardPr
 
   const winningScore = useMemo(() => Math.max(0, ...Object.values(totals)), [totals]);
 
-  const calculateWinners = useCallback(() => {
-    if (winningScore > 0) {
-      const currentWinners = game.players
-        .filter((p) => totals[p] === winningScore)
-        .map((name) => ({ name, score: winningScore }));
-      setWinners(currentWinners);
-    }
-  }, [game.players, totals, winningScore]);
+  // Derived winners list
+  const winners = useMemo(() => {
+    if (!isCompleted || winningScore <= 0) return [];
+    return game.players
+      .filter((p) => totals[p] === winningScore)
+      .map((name) => ({ name, score: winningScore }));
+  }, [isCompleted, game.players, totals, winningScore]);
 
-  useEffect(() => {
-    if (isCompleted) {
-      calculateWinners();
-    }
-  }, [isCompleted, calculateWinners]);
+  // Derived sorted players list
+  const sortedPlayers = useMemo(() => {
+    return [...game.players].sort((a, b) => {
+      const scoreA = totals[a] ?? 0;
+      const scoreB = totals[b] ?? 0;
+      return sortAsc ? scoreA - scoreB : scoreB - scoreA;
+    });
+  }, [game.players, totals, sortAsc]);
 
+  const currentPlayer = game.players[currentPlayerIndex];
+
+  // --- Effects ---
+
+  // Focus the score input when the current player changes
   useEffect(() => {
-    setSortedPlayers(
-      [...game.players].sort((a, b) => {
-        const scoreA = totals[a] ?? 0;
-        const scoreB = totals[b] ?? 0;
-        return sortAsc ? scoreA - scoreB : scoreB - scoreA;
-      })
-    );
-  }, [totals, game.players, sortAsc]);
+    if (!isCompleted && scoreInputRef.current) {
+      scoreInputRef.current.focus();
+    }
+  }, [currentPlayerIndex, isCompleted]);
+
+  // Focus the edit input when the edit modal opens
+  useEffect(() => {
+    if (editingScore && editInputRef.current) {
+      editInputRef.current.focus();
+    }
+  }, [editingScore]);
+
+  // --- Handlers ---
 
   const updateAndSetGame = async (updates: Partial<Game>) => {
     if (!db || !game._id) return;
-    const updatedGame = { ...game, ...updates, lastPlayed: Date.now() };
+    const now = Date.now();
+    const updatedGame = { ...game, ...updates, lastPlayed: now };
     setGame(updatedGame);
-    await updateGame(db, game._id, { ...updates, lastPlayed: Date.now() });
+    await updateGame(db, game._id, { ...updates, lastPlayed: now });
   };
 
   const handleAddScore = async () => {
@@ -84,11 +111,11 @@ export default function SimpleScorecard({ game: initialGame }: SimpleScorecardPr
     const score = parseInt(scoreInput, 10);
     if (isNaN(score) || !db || !game._id) return;
 
-    const currentPlayer = game.players[currentPlayerIndex];
+    const currentP = game.players[currentPlayerIndex];
     const newScores = JSON.parse(JSON.stringify(game.scores || {}));
-    if (!newScores[currentPlayer]) newScores[currentPlayer] = { rounds: [] };
-    if (!newScores[currentPlayer].rounds) newScores[currentPlayer].rounds = [];
-    newScores[currentPlayer].rounds.push(score);
+    if (!newScores[currentP]) newScores[currentP] = { rounds: [] };
+    if (!newScores[currentP].rounds) newScores[currentP].rounds = [];
+    newScores[currentP].rounds.push(score);
 
     await updateAndSetGame({ scores: newScores });
     setCurrentPlayerIndex((prevIndex) => (prevIndex + 1) % game.players.length);
@@ -135,12 +162,9 @@ export default function SimpleScorecard({ game: initialGame }: SimpleScorecardPr
 
   const handleFinishGame = async () => {
     if (isCompleted || !db || !game._id) return;
-    calculateWinners();
     setShowWinnerModal(true);
     await updateAndSetGame({ status: 'Completed' });
   };
-
-  const currentPlayer = game.players[currentPlayerIndex];
 
   return (
     <div className='p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto'>
@@ -189,13 +213,13 @@ export default function SimpleScorecard({ game: initialGame }: SimpleScorecardPr
           </h2>
           <div className='flex flex-col sm:flex-row gap-2'>
             <input
+              ref={scoreInputRef}
               type='number'
               value={scoreInput}
               onChange={(e) => setScoreInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAddScore()}
               placeholder={`Enter score for ${currentPlayer}`}
               className='flex-grow p-3 border-2 border-border rounded-lg text-center text-xl font-bold focus:border-primary focus:ring-1 focus:ring-primary'
-              autoFocus
             />
             <button
               onClick={handleAddScore}
@@ -320,12 +344,12 @@ export default function SimpleScorecard({ game: initialGame }: SimpleScorecardPr
               </button>
             </div>
             <input
+              ref={editInputRef}
               type='number'
               value={editingValue}
               onChange={(e) => setEditingValue(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleEditScore()}
               className='w-full p-3 bg-foreground/5 border-2 border-border rounded-lg mb-4 text-center text-2xl font-bold focus:border-primary focus:ring-1 focus:ring-primary'
-              autoFocus
             />
             <button
               onClick={handleEditScore}

@@ -1,17 +1,25 @@
 'use client';
 
+// --- React ---
 import { useEffect, useState, Suspense } from 'react';
+// --- Next/Router ---
 import { useSearchParams } from 'next/navigation';
+// --- Types ---
 import { Game } from '@/types';
+// --- Icons ---
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+// --- Context ---
 import { useDb } from '@/contexts/DbContext';
+// --- Helpers ---
 import { getGame } from '@/lib/database';
 // --- Scorecard Components ---
 import YahtzeeScorecard from '@/components/scorecards/YahtzeeScorecard';
 import Phase10Scorecard from '@/components/scorecards/Phase10Scorecard';
 import SimpleScorecard from '@/components/scorecards/SimpleScorecard';
 import GolfScorecard from '@/components/scorecards/golf/GolfScorecard';
+import HeartsScorecard from '@/components/scorecards/HeartsScorecard';
+import SpadesScorecard from '@/components/scorecards/SpadesScorecard';
 
 // A component that uses useSearchParams must be wrapped in a Suspense boundary.
 const GamePageContent = () => {
@@ -40,7 +48,7 @@ const GamePageContent = () => {
     );
   }
 
-  // Add the new condition to render the GolfScorecard
+  // Render the appropriate scorecard based on game type
   if (game.name === 'Simple Score') {
     return <SimpleScorecard game={game} />;
   } else if (game.name === 'Phase 10') {
@@ -49,6 +57,10 @@ const GamePageContent = () => {
     return <YahtzeeScorecard game={game} />;
   } else if (game.name === 'Golf' || game.name === 'Putt-Putt') {
     return <GolfScorecard game={game} />;
+  } else if (game.name === 'Hearts') {
+    return <HeartsScorecard game={game} />;
+  } else if (game.name === 'Spades') {
+    return <SpadesScorecard game={game} />;
   }
 
   // Placeholder for other game types

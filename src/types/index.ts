@@ -1,5 +1,3 @@
-// --- Type Definitions ---
-
 // Represents the version document stored in the database
 export interface VersionDoc {
   _id: string;
@@ -9,10 +7,18 @@ export interface VersionDoc {
 
 // Represents the scores for a single round in Phase 10
 export interface Phase10Round {
-  [player: string]: {
-    score: number;
-    phaseCompleted: boolean;
-  };
+  [player: string]: { score: number; phaseCompleted: boolean };
+}
+
+// Represents the scores for a single round in Hearts
+export interface HeartsRound {
+  [player: string]: { score: number; shotTheMoon: boolean };
+}
+
+// Represents the scores for a single round in Spades
+export interface SpadesRound {
+  team1: { bid: number; tricks: number; bags: number; score: number };
+  team2: { bid: number; tricks: number; bags: number; score: number };
 }
 
 // Represents the scores for a single round in Golf
@@ -41,9 +47,11 @@ export type Game = {
     [player: string]: PlayerScores; // Use the more specific PlayerScores type
   };
   phase10Rounds?: Phase10Round[];
+  heartsRounds?: HeartsRound[];
+  spadesRounds?: SpadesRound[];
   golfRounds?: GolfRound[];
   lastPlayed?: number;
-  courseName?: string; // Added to store the name of the saved course
+  courseName?: string;
 };
 
 // Defines the shape of a saved course template

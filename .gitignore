@@ -46,6 +46,4 @@ next-env.d.ts
 /public/robots.txt
 
 # Development
-site-prompt.md
-info.md
-prompts.md
+.obl
